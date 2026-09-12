@@ -4,6 +4,8 @@ import PublicPageShell from "@/components/home/PublicPageShell";
 import {
   getExercisesByMuscle,
   getMuscleGroup,
+  exerciseImageForExercise,
+  exerciseImageForSlot,
   muscleGroups,
 } from "@/lib/exercise-data";
 
@@ -24,7 +26,16 @@ export default async function MusclePage({
 
   return (
     <PublicPageShell>
-      <section className="if-section if-hero-full">
+      <section
+        className="if-section if-hero"
+        style={{
+          backgroundImage: `linear-gradient(90deg, rgba(10,10,15,0.92), rgba(10,10,15,0.58)), url(${exerciseImageForSlot(group.imageSlot)})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: 500,
+        }}
+      >
+        <div>
         <p className="if-kicker">{group.name} Training</p>
         <h1 className="if-title">{group.name} exercises with form-first cues.</h1>
         <p className="if-copy">{group.focus}</p>
@@ -35,6 +46,7 @@ export default async function MusclePage({
           <Link href={`/exercise/${groupExercises[0]?.slug}`} className="if-button">
             View First Exercise
           </Link>
+        </div>
         </div>
       </section>
 
@@ -47,6 +59,17 @@ export default async function MusclePage({
               className="if-card"
               style={{ color: "inherit", textDecoration: "none" }}
             >
+              <div
+                style={{
+                  minHeight: 150,
+                  borderRadius: 10,
+                  marginBottom: 16,
+                  backgroundImage: `linear-gradient(180deg, rgba(10,10,15,0.08), rgba(10,10,15,0.7)), url(${exerciseImageForExercise(exercise)})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  transition: "transform 0.28s ease, filter 0.28s ease",
+                }}
+              />
               <span className="if-tag">{exercise.difficulty}</span>
               <h2>{exercise.name}</h2>
               <p>{exercise.description}</p>

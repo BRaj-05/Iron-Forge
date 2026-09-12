@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { exercises, muscleGroups } from "@/lib/exercise-data";
+import { exerciseImageForExercise, exerciseImageForSlot, exercises, muscleGroups } from "@/lib/exercise-data";
 import { cardioWorkouts, learningImageForSlot } from "@/lib/cardio-nutrition-data";
 import { theme } from "@/lib/theme";
 
@@ -43,7 +43,13 @@ export default function CustomerWorkoutsPage() {
 
       <section style={styles.grid}>
         {todayStack.map((exercise, index) => (
-          <article key={exercise!.slug} style={styles.card}>
+          <article
+            key={exercise!.slug}
+            style={{
+              ...styles.card,
+              backgroundImage: `linear-gradient(180deg, rgba(9,10,14,0.18), rgba(9,10,14,0.95)), url(${exerciseImageForExercise(exercise!)})`,
+            }}
+          >
             <span style={styles.number}>0{index + 1}</span>
             <p style={styles.cardMeta}>{exercise!.muscleGroup}</p>
             <h2 style={styles.cardTitle}>{exercise!.name}</h2>
@@ -65,7 +71,14 @@ export default function CustomerWorkoutsPage() {
           <h2 style={styles.sectionTitle}>Pick the body part, then train with context.</h2>
           <div style={styles.groupList}>
             {muscleGroups.slice(0, 8).map((group) => (
-              <Link key={group.slug} href={`/gym/${group.slug}`} style={styles.groupRow}>
+              <Link
+                key={group.slug}
+                href={`/gym/${group.slug}`}
+                style={{
+                  ...styles.groupRow,
+                  backgroundImage: `linear-gradient(90deg, rgba(17,17,24,0.95), rgba(17,17,24,0.66)), url(${exerciseImageForSlot(group.imageSlot)})`,
+                }}
+              >
                 <span>{group.name}</span>
                 <small>{group.focus}</small>
               </Link>
@@ -105,7 +118,7 @@ const styles: Record<string, CSSProperties> = {
     gap: 24,
     alignItems: "center",
     border: `1px solid ${theme.border}`,
-    borderRadius: 28,
+    borderRadius: 14,
     padding: 34,
     marginBottom: 22,
     background:
@@ -128,7 +141,7 @@ const styles: Record<string, CSSProperties> = {
   primaryButton: {
     background: theme.gradient,
     color: "#fff",
-    borderRadius: 14,
+    borderRadius: 8,
     padding: "14px 18px",
     textDecoration: "none",
     fontWeight: 950,
@@ -136,14 +149,14 @@ const styles: Record<string, CSSProperties> = {
   secondaryButton: {
     border: `1px solid ${theme.border}`,
     color: theme.textPrimary,
-    borderRadius: 14,
+    borderRadius: 8,
     padding: "14px 18px",
     textDecoration: "none",
     fontWeight: 950,
   },
   focusCard: {
     minHeight: 220,
-    borderRadius: 24,
+    borderRadius: 12,
     border: "1px solid rgba(255,255,255,0.1)",
     background: "rgba(255,255,255,0.055)",
     display: "grid",
@@ -161,9 +174,14 @@ const styles: Record<string, CSSProperties> = {
   },
   card: {
     border: `1px solid ${theme.border}`,
-    borderRadius: 22,
+    borderRadius: 12,
     padding: 22,
-    background: "linear-gradient(145deg, rgba(17,24,39,0.88), rgba(17,17,24,0.95))",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    minHeight: 310,
+    display: "grid",
+    alignContent: "end",
+    transition: "transform 0.26s ease, border-color 0.26s ease, box-shadow 0.26s ease",
   },
   number: { color: theme.accent, fontWeight: 950 },
   cardMeta: { color: theme.textMuted, fontSize: 12, textTransform: "uppercase" },
@@ -174,7 +192,7 @@ const styles: Record<string, CSSProperties> = {
   split: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
   panel: {
     border: `1px solid ${theme.border}`,
-    borderRadius: 24,
+    borderRadius: 12,
     padding: 24,
     background: theme.surface,
   },
@@ -184,15 +202,17 @@ const styles: Record<string, CSSProperties> = {
     display: "grid",
     gap: 4,
     padding: 14,
-    borderRadius: 16,
-    background: theme.surfaceAlt,
+    borderRadius: 8,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     color: theme.textPrimary,
     textDecoration: "none",
+    transition: "transform 0.22s ease, filter 0.22s ease",
   },
   cardioGrid: { display: "grid", gap: 12 },
   cardioCard: {
     minHeight: 142,
-    borderRadius: 18,
+    borderRadius: 10,
     backgroundSize: "cover",
     backgroundPosition: "center",
     padding: 18,

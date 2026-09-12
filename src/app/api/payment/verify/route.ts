@@ -1,64 +1,53 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import { getTokenFromRequest, verifyAccessToken } from "@/lib/auth";
-import Membership from "@/models/Membership";
-import Payment from "@/models/Payment";
-import Subscription from "@/models/Subscription";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireRole } from "@/lib/session";
+import { getSubscriptionStatus } from "@/lib/subscriptions";
 
-type TokenPayload = {
-  id: string;
-};
+const VerifySchema = z.object({
+  paymentId: z.string(),
+  planId: z.string(),
+});
 
-export async function POST(req: Request) {
-  try {
-    const token = getTokenFromRequest(req);
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function POST(request: Request) {
+  const auth = await requireRole(request, ["CUSTOMER"]);
+  if (auth.response || !auth.session) return auth.response;
 
-    const decoded = verifyAccessToken(token) as TokenPayload;
-    const { paymentId } = await req.json();
+  const parsed = VerifySchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Payment and plan are required." }, { status: 400 });
 
-    await connectDB();
-    const payment = await Payment.findById(paymentId);
-    if (!payment) {
-      return NextResponse.json({ error: "Payment not found." }, { status: 404 });
-    }
+  const [payment, plan] = await Promise.all([
+    prisma.payment.findUnique({ where: { id: parsed.data.paymentId } }),
+    prisma.membershipPlan.findUnique({ where: { id: parsed.data.planId } }),
+  ]);
 
-    payment.status = "SUCCESS";
-    payment.paymentStatus = "SUCCESS";
-    payment.providerPaymentId = payment.providerPaymentId || `MOCK-PAID-${Date.now()}`;
-    await payment.save();
+  if (!payment || payment.userId !== auth.session.userId) {
+    return NextResponse.json({ error: "Payment not found." }, { status: 404 });
+  }
+  if (!plan) return NextResponse.json({ error: "Plan not found." }, { status: 404 });
 
-    const membership = await Membership.findById(payment.membershipId);
-    const duration = membership?.duration || 30;
-    const startDate = new Date();
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + duration);
+  const startDate = new Date();
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + plan.durationDays);
 
-    const subscription = await Subscription.create({
-      userId: decoded.id,
-      customerId: payment.customerId,
-      membershipId: payment.membershipId,
+  const subscription = await prisma.subscription.create({
+    data: {
+      userId: auth.session.userId,
+      planId: plan.id,
       startDate,
       endDate,
-      status: "ACTIVE",
-      paymentId: payment._id,
-      provider: payment.provider,
-      externalSubscriptionId: `IF-SUB-${decoded.id}-${Date.now()}`,
-      autoRenew: false,
-    });
+      status: getSubscriptionStatus(endDate).status,
+    },
+  });
 
-    return NextResponse.json({
-      payment,
-      subscription,
-      message: "Payment verified and subscription activated.",
-    });
-  } catch (error) {
-    console.error("Payment verify error:", error);
-    return NextResponse.json(
-      { error: "Could not verify payment." },
-      { status: 500 },
-    );
-  }
+  const paid = await prisma.payment.update({
+    where: { id: payment.id },
+    data: { status: "PAID", subscriptionId: subscription.id },
+  });
+
+  return NextResponse.json({
+    payment: paid,
+    subscription,
+    message: "Payment verified and subscription activated.",
+  });
 }

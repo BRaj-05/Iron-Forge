@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { DEFAULT_AVATAR_URL } from "@/lib/media";
 import { theme } from "@/lib/theme";
 
 type Role = "CUSTOMER" | "TRAINER" | "OWNER";
@@ -20,6 +21,7 @@ type Subscription = { id: string; userId: string; planId: string; endDate: strin
 type Payment = { id: string; userId: string; amount: number; method: string; status: string; createdAt: string };
 type Attendance = { id: string; customerId: string; trainerId?: string | null; checkIn: string; checkOut?: string | null };
 type Notification = { id: string; userId: string; type: string; message: string; isRead: boolean; createdAt: string };
+type SupportRequest = { id: string; requesterId: string; assignedTrainerId?: string | null; type: string; subject: string; message: string; status: string; createdAt: string };
 
 type AdminData = {
   users: User[];
@@ -28,6 +30,7 @@ type AdminData = {
   payments: Payment[];
   attendance: Attendance[];
   notifications: Notification[];
+  supportRequests: SupportRequest[];
   expiringMembers: Subscription[];
 };
 
@@ -38,16 +41,12 @@ const emptyData: AdminData = {
   payments: [],
   attendance: [],
   notifications: [],
+  supportRequests: [],
   expiringMembers: [],
 };
 
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+function customerName(users: User[], userId: string) {
+  return users.find((user) => user.id === userId)?.name || `Customer ${userId.slice(-6)}`;
 }
 
 export default function AdminConsole() {
@@ -56,6 +55,8 @@ export default function AdminConsole() {
   const [error, setError] = useState("");
   const [trainerForm, setTrainerForm] = useState({ name: "", email: "", password: "", specialization: "" });
   const [planForm, setPlanForm] = useState({ name: "", durationDays: 30, price: 0, features: "" });
+  const [assignmentForm, setAssignmentForm] = useState({ customerId: "", trainerId: "" });
+  const [renewalForm, setRenewalForm] = useState({ customerId: "", planId: "" });
 
   async function loadData() {
     setError("");
@@ -121,6 +122,46 @@ export default function AdminConsole() {
     await loadData();
   }
 
+  async function assignTrainer() {
+    if (!assignmentForm.customerId || !assignmentForm.trainerId) {
+      setError("Choose a customer and trainer first.");
+      return;
+    }
+
+    const response = await fetch(`/api/admin/users/${assignmentForm.customerId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ assignedTrainerId: assignmentForm.trainerId }),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      setError(payload.error || "Could not assign trainer.");
+      return;
+    }
+    setAssignmentForm({ customerId: "", trainerId: "" });
+    await loadData();
+  }
+
+  async function renewSubscription() {
+    if (!renewalForm.customerId || !renewalForm.planId) {
+      setError("Choose a customer and plan first.");
+      return;
+    }
+
+    const response = await fetch("/api/admin/subscriptions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: renewalForm.customerId, planId: renewalForm.planId }),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      setError(payload.error || "Could not renew subscription.");
+      return;
+    }
+    setRenewalForm({ customerId: "", planId: "" });
+    await loadData();
+  }
+
   if (loading) return <main style={styles.page}>Loading owner console...</main>;
 
   return (
@@ -147,11 +188,7 @@ export default function AdminConsole() {
         <div style={styles.table}>
           {data.users.map((user) => (
             <div key={user.id} style={styles.row}>
-            {user.photoUrl ? (
-              <Image src={user.photoUrl} alt="" width={38} height={38} unoptimized style={styles.avatar} />
-            ) : (
-              <span style={styles.avatar}>{initials(user.name)}</span>
-            )}
+            <Image src={user.photoUrl || DEFAULT_AVATAR_URL} alt="" width={38} height={38} unoptimized style={styles.avatar} />
               <span>{user.name}</span>
               <span>{user.email}</span>
               <strong>{user.role}</strong>
@@ -166,11 +203,26 @@ export default function AdminConsole() {
       <section id="trainers" style={styles.panel}>
         <h2 style={styles.panelTitle}>Create Trainer</h2>
         <div style={styles.formGrid}>
-          <input placeholder="Name" value={trainerForm.name} onChange={(event) => setTrainerForm({ ...trainerForm, name: event.target.value })} style={styles.input} />
-          <input placeholder="Email" value={trainerForm.email} onChange={(event) => setTrainerForm({ ...trainerForm, email: event.target.value })} style={styles.input} />
-          <input placeholder="Password" type="password" value={trainerForm.password} onChange={(event) => setTrainerForm({ ...trainerForm, password: event.target.value })} style={styles.input} />
+          <input placeholder="Trainer name" value={trainerForm.name} onChange={(event) => setTrainerForm({ ...trainerForm, name: event.target.value })} style={styles.input} />
+          <input placeholder="trainer@example.com" value={trainerForm.email} onChange={(event) => setTrainerForm({ ...trainerForm, email: event.target.value })} style={styles.input} />
+          <input placeholder="Temporary password" type="password" value={trainerForm.password} onChange={(event) => setTrainerForm({ ...trainerForm, password: event.target.value })} style={styles.input} />
           <input placeholder="Specialization" value={trainerForm.specialization} onChange={(event) => setTrainerForm({ ...trainerForm, specialization: event.target.value })} style={styles.input} />
           <button onClick={createTrainer} style={styles.button}>Create trainer</button>
+        </div>
+      </section>
+
+      <section id="assignments" style={styles.panel}>
+        <h2 style={styles.panelTitle}>Assign Trainer</h2>
+        <div style={styles.formGrid}>
+          <select value={assignmentForm.customerId} onChange={(event) => setAssignmentForm({ ...assignmentForm, customerId: event.target.value })} style={styles.input}>
+            <option value="">Customer</option>
+            {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}
+          </select>
+          <select value={assignmentForm.trainerId} onChange={(event) => setAssignmentForm({ ...assignmentForm, trainerId: event.target.value })} style={styles.input}>
+            <option value="">Trainer</option>
+            {trainers.map((trainer) => <option key={trainer.id} value={trainer.id}>{trainer.name}</option>)}
+          </select>
+          <button onClick={assignTrainer} style={styles.button}>Save assignment</button>
         </div>
       </section>
 
@@ -194,8 +246,33 @@ export default function AdminConsole() {
         </div>
       </section>
 
+      <section id="subscriptions" style={styles.panel}>
+        <h2 style={styles.panelTitle}>Subscription Renewal</h2>
+        <div style={styles.formGrid}>
+          <select value={renewalForm.customerId} onChange={(event) => setRenewalForm({ ...renewalForm, customerId: event.target.value })} style={styles.input}>
+            <option value="">Customer</option>
+            {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}
+          </select>
+          <select value={renewalForm.planId} onChange={(event) => setRenewalForm({ ...renewalForm, planId: event.target.value })} style={styles.input}>
+            <option value="">Plan</option>
+            {data.plans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} - ${plan.price}</option>)}
+          </select>
+          <button onClick={renewSubscription} style={styles.button}>Create renewal</button>
+        </div>
+        <div style={styles.list}>
+          {data.subscriptions.map((item) => (
+            <span key={item.id}>{customerName(data.users, item.userId)} - {item.status} - ends {new Date(item.endDate).toLocaleDateString()}</span>
+          ))}
+        </div>
+      </section>
+
       <DataList id="payments" title="Payments" rows={data.payments.map((item) => `${item.status} - $${item.amount} - ${item.method}`)} />
       <DataList id="attendance" title="Attendance" rows={data.attendance.map((item) => `${new Date(item.checkIn).toLocaleString()} - customer ${item.customerId.slice(-6)}`)} />
+      <DataList
+        id="requests"
+        title="Customer Requests"
+        rows={data.supportRequests.map((item) => `${item.status} - ${item.type} - ${customerName(data.users, item.requesterId)}: ${item.subject} - ${item.message}`)}
+      />
       <DataList id="notifications" title="Notifications" rows={data.notifications.map((item) => `${item.type}: ${item.message}`)} />
     </main>
   );

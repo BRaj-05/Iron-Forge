@@ -1,89 +1,60 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import { getTokenFromRequest, verifyAccessToken } from "@/lib/auth";
-import Membership from "@/models/Membership";
-import Payment from "@/models/Payment";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireRole } from "@/lib/session";
 
-type TokenPayload = {
-  id: string;
-  email?: string;
+const CheckoutSchema = z.object({
+  plan: z.string().trim().min(1),
+});
+
+const fallbackPlans: Record<string, { name: string; durationDays: number; price: number; features: string[] }> = {
+  ELITE: { name: "Elite", durationDays: 30, price: 2499, features: ["Gym access", "Workout tracking", "Trainer support"] },
+  PRO: { name: "Pro", durationDays: 90, price: 5999, features: ["Gym access", "Workout tracking", "Trainer support"] },
+  SELECT: { name: "Select", durationDays: 365, price: 14999, features: ["Annual access", "Workout tracking", "Trainer support"] },
 };
 
-const planFallbacks: Record<string, { name: string; duration: number; price: number }> = {
-  ELITE: { name: "Elite", duration: 30, price: 2499 },
-  PRO: { name: "Pro", duration: 90, price: 5999 },
-  SELECT: { name: "Select", duration: 365, price: 14999 },
-};
+function isObjectId(value: string) {
+  return /^[a-f\d]{24}$/i.test(value);
+}
 
-export async function POST(req: Request) {
-  try {
-    const token = getTokenFromRequest(req);
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function POST(request: Request) {
+  const auth = await requireRole(request, ["CUSTOMER"]);
+  if (auth.response || !auth.session) return auth.response;
 
-    const decoded = verifyAccessToken(token) as TokenPayload;
-    const body = await req.json();
-    const planKey = String(body.plan || "ELITE").toUpperCase();
-    const fallback = planFallbacks[planKey] || planFallbacks.ELITE;
+  const parsed = CheckoutSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Plan is required." }, { status: 400 });
 
-    await connectDB();
+  const planKey = parsed.data.plan.toUpperCase();
+  const fallback = fallbackPlans[planKey] || fallbackPlans.ELITE;
+  let plan = isObjectId(parsed.data.plan)
+    ? await prisma.membershipPlan.findUnique({ where: { id: parsed.data.plan } })
+    : null;
 
-    let membership = await Membership.findOne({ name: fallback.name });
-    if (!membership) {
-      membership = await Membership.create({
-        name: fallback.name,
-        duration: fallback.duration,
-        price: fallback.price,
-        features: "Gym access, member dashboard, workout tracking, and trainer support.",
-      });
-    }
+  plan ??= await prisma.membershipPlan.findFirst({ where: { name: fallback.name } });
 
-    const provider = process.env.STRIPE_SECRET_KEY ? "STRIPE" : "MOCK";
-    const payment = await Payment.create({
-      userId: decoded.id,
-      membershipId: membership._id,
-      amount: membership.price,
-      currency: "INR",
-      provider,
-      paymentMethod: provider === "STRIPE" ? "STRIPE_CHECKOUT" : "MOCK_CHECKOUT",
-      paymentStatus: "PENDING",
-      status: "PENDING",
-      transactionId: `IF-${Date.now()}`,
-      planName: membership.name,
-      metadata: {
-        userId: decoded.id,
-        email: decoded.email,
-        planKey,
-        note:
-          provider === "MOCK"
-            ? "Set STRIPE_SECRET_KEY and Stripe Prices later to create real Checkout Sessions."
-            : "Stripe key detected. Checkout Session wiring is prepared for the next gateway step.",
-      },
-    });
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const checkoutUrl =
-      provider === "MOCK"
-        ? `${appUrl}/customer/payments?mockPaymentId=${payment._id}`
-        : `${appUrl}/customer/payments?provider=stripe-next-step&paymentId=${payment._id}`;
-
-    payment.checkoutUrl = checkoutUrl;
-    await payment.save();
-
-    return NextResponse.json({
-      provider,
-      checkoutUrl,
-      paymentId: payment._id,
-      amount: payment.amount,
-      currency: payment.currency,
-      planName: payment.planName,
-    });
-  } catch (error) {
-    console.error("Create checkout error:", error);
-    return NextResponse.json(
-      { error: "Could not create checkout." },
-      { status: 500 },
-    );
+  if (!plan) {
+    plan = await prisma.membershipPlan.create({ data: fallback });
   }
+
+  const payment = await prisma.payment.create({
+    data: {
+      userId: auth.session.userId,
+      amount: plan.price,
+      method: process.env.STRIPE_SECRET_KEY ? "STRIPE_CHECKOUT" : "MOCK_CHECKOUT",
+      status: "PENDING",
+    },
+  });
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  const checkoutUrl = `${appUrl}/customer/payments?mockPaymentId=${payment.id}&planId=${plan.id}`;
+
+  return NextResponse.json({
+    provider: process.env.STRIPE_SECRET_KEY ? "STRIPE" : "MOCK",
+    checkoutUrl,
+    paymentId: payment.id,
+    planId: plan.id,
+    amount: payment.amount,
+    currency: "INR",
+    planName: plan.name,
+  });
 }

@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { dateKey } from "@/lib/daily";
 import { getSessionFromRequest, requireRole } from "@/lib/session";
 import { getSubscriptionStatus, getUserWithSubscription } from "@/lib/subscriptions";
+
+const optionalNullableNumber = z.preprocess(
+  (value) => (value === "" ? null : value),
+  z.coerce.number().positive().nullable().optional(),
+);
 
 const ProfileSchema = z.object({
   name: z.string().trim().min(2).optional(),
   phone: z.string().trim().nullable().optional(),
   address: z.string().trim().nullable().optional(),
-  dateOfBirth: z.string().datetime().nullable().optional(),
+  dateOfBirth: z.string().nullable().optional(),
   gender: z.string().trim().nullable().optional(),
+  heightCm: optionalNullableNumber,
+  weightKg: optionalNullableNumber,
   emergencyContact: z.string().trim().nullable().optional(),
 });
 
@@ -22,13 +30,17 @@ export async function GET(request: Request) {
   const result = await getUserWithSubscription(session.userId);
   if (!result) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  const [attendance, payments, notifications, trainer] = await Promise.all([
+  const today = dateKey();
+  const [attendance, payments, notifications, trainer, workout, diet, metric] = await Promise.all([
     prisma.attendance.findMany({ where: { customerId: session.userId }, orderBy: { checkIn: "desc" }, take: 30 }),
     prisma.payment.findMany({ where: { userId: session.userId }, orderBy: { createdAt: "desc" }, take: 20 }),
     prisma.notification.findMany({ where: { userId: session.userId }, orderBy: { createdAt: "desc" }, take: 10 }),
     result.user.assignedTrainerId
       ? prisma.user.findUnique({ where: { id: result.user.assignedTrainerId }, select: { id: true, name: true, email: true, photoUrl: true, specialization: true } })
       : null,
+    prisma.dailyWorkoutLog.findUnique({ where: { customerId_logDate: { customerId: session.userId, logDate: today } } }),
+    prisma.dailyDietLog.findUnique({ where: { customerId_logDate: { customerId: session.userId, logDate: today } } }),
+    prisma.bodyMetricLog.findUnique({ where: { customerId_logDate: { customerId: session.userId, logDate: today } } }),
   ]);
 
   const expiry = result.subscription ? getSubscriptionStatus(result.subscription.endDate) : null;
@@ -41,6 +53,7 @@ export async function GET(request: Request) {
     attendance,
     payments,
     notifications,
+    daily: { logDate: today, workout, diet, metric },
   });
 }
 
@@ -59,7 +72,20 @@ export async function PATCH(request: Request) {
       ...parsed.data,
       dateOfBirth: parsed.data.dateOfBirth ? new Date(parsed.data.dateOfBirth) : undefined,
     },
-    select: { id: true, name: true, email: true, role: true, phone: true, photoUrl: true, address: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      photoUrl: true,
+      address: true,
+      dateOfBirth: true,
+      gender: true,
+      heightCm: true,
+      weightKg: true,
+      emergencyContact: true,
+    },
   });
 
   return NextResponse.json({ user });

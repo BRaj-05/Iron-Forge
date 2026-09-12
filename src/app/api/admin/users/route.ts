@@ -51,21 +51,30 @@ export async function POST(request: Request) {
   if (auth.response) return auth.response;
 
   const parsed = CreateUserSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "Invalid user payload." }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message || "Invalid user payload." },
+      { status: 400 },
+    );
+  }
 
-  const user = await prisma.user.create({
-    data: {
-      name: parsed.data.name,
-      email: parsed.data.email.toLowerCase().trim(),
-      passwordHash: await bcrypt.hash(parsed.data.password, 10),
-      role: parsed.data.role,
-      phone: parsed.data.phone,
-      specialization: parsed.data.role === "TRAINER" ? parsed.data.specialization : undefined,
-      bio: parsed.data.role === "TRAINER" ? parsed.data.bio : undefined,
-      experienceYrs: parsed.data.role === "TRAINER" ? parsed.data.experienceYrs : undefined,
-      assignedCustomerIds: [],
-    },
-  });
+  try {
+    const user = await prisma.user.create({
+      data: {
+        name: parsed.data.name,
+        email: parsed.data.email.toLowerCase().trim(),
+        passwordHash: await bcrypt.hash(parsed.data.password, 10),
+        role: parsed.data.role,
+        phone: parsed.data.phone,
+        specialization: parsed.data.role === "TRAINER" ? parsed.data.specialization : undefined,
+        bio: parsed.data.role === "TRAINER" ? parsed.data.bio : undefined,
+        experienceYrs: parsed.data.role === "TRAINER" ? parsed.data.experienceYrs : undefined,
+        assignedCustomerIds: [],
+      },
+    });
 
-  return NextResponse.json({ user }, { status: 201 });
+    return NextResponse.json({ user }, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: "A user with this email already exists." }, { status: 409 });
+  }
 }

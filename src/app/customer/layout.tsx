@@ -1,40 +1,37 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import CustomerSupportFooter from "@/components/CustomerSupportFooter";
 import { theme } from "@/lib/theme";
-
-const publicLinks = [
-  { label: "Exercises", href: "/gym" },
-  { label: "Yoga", href: "/yoga" },
-  { label: "Nutrition", href: "/nutrition" },
-  { label: "Equipment", href: "/equipment" },
-  { label: "Plans", href: "/plans" },
-];
 
 const memberLinks = [
   { label: "Home", href: "/customer/dashboard" },
   { label: "Workouts", href: "/customer/workouts" },
-  { label: "Recovery", href: "/customer/yoga" },
   { label: "Diet", href: "/customer/diet" },
   { label: "Progress", href: "/customer/progress" },
   { label: "Sessions", href: "/customer/sessions" },
   { label: "Payments", href: "/customer/payments" },
-  { label: "Coach", href: "/customer/ai-coach" },
-  { label: "Tasks", href: "/customer/todos" },
-  { label: "Calendar", href: "/customer/calendar" },
   { label: "Rank", href: "/customer/leaderboard" },
 ];
 
 export default function CustomerLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [query, setQuery] = useState("");
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
+  }
+
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const value = query.trim();
+    router.push(value ? `/gym?search=${encodeURIComponent(value)}` : "/gym");
   }
 
   return (
@@ -51,13 +48,6 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
         </Link>
 
         <nav style={styles.navLinks}>
-          <div style={styles.linkGroup}>
-            {publicLinks.map((link) => (
-              <Link key={link.href} href={link.href} style={styles.publicLink}>
-                {link.label}
-              </Link>
-            ))}
-          </div>
           <div style={styles.linkGroup}>
             {memberLinks.map((link) => {
               const active =
@@ -100,6 +90,17 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
           </div>
         </nav>
 
+        <form onSubmit={handleSearch} style={styles.search}>
+          <input
+            aria-label="Search exercises"
+            placeholder="Search exercises"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            style={styles.searchInput}
+          />
+          <button type="submit" style={styles.searchButton}>Search</button>
+        </form>
+
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
@@ -111,6 +112,7 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
       </motion.header>
 
       <section style={styles.content}>{children}</section>
+      <CustomerSupportFooter />
     </main>
   );
 }
@@ -123,17 +125,16 @@ const styles: Record<string, React.CSSProperties> = {
     color: theme.textPrimary,
   },
   nav: {
-    minHeight: 78,
-    padding: "12px 24px",
+    minHeight: 86,
+    padding: "14px 22px",
     display: "grid",
-    gridTemplateColumns: "210px minmax(0, 1fr) auto",
+    gridTemplateColumns: "190px minmax(260px, 1fr) minmax(220px, 300px) auto",
     alignItems: "center",
-    gap: 18,
+    gap: 16,
     position: "sticky",
     top: 0,
     zIndex: 30,
-    background:
-      "linear-gradient(90deg, rgba(10,10,15,0.94), rgba(17,17,24,0.88))",
+    background: "rgba(6,7,10,0.9)",
     backdropFilter: "blur(22px)",
     borderBottom: `1px solid ${theme.border}`,
     boxShadow: "0 20px 60px rgba(0,0,0,0.22)",
@@ -148,42 +149,36 @@ const styles: Record<string, React.CSSProperties> = {
   logoMark: {
     width: 38,
     height: 38,
-    borderRadius: 12,
+    borderRadius: 8,
     display: "grid",
     placeItems: "center",
     background: theme.gradient,
     fontWeight: 900,
   },
   logoText: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 900,
   },
   navLinks: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     gap: 12,
     overflowX: "auto",
+    minWidth: 0,
     scrollbarWidth: "none",
     paddingBottom: 4,
   },
   linkGroup: {
     display: "flex",
     alignItems: "center",
-    gap: 7,
-    flexShrink: 0,
+    gap: 6,
+    flexShrink: 1,
     padding: 5,
     border: `1px solid ${theme.border}`,
     borderRadius: 999,
-    background: "rgba(255,255,255,0.025)",
-  },
-  publicLink: {
-    color: "rgba(255,255,255,0.56)",
-    textDecoration: "none",
-    fontSize: 12,
-    fontWeight: 800,
-    padding: "9px 11px",
-    whiteSpace: "nowrap",
+    background: "rgba(255,255,255,0.04)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
   },
   memberLink: {
     position: "relative",
@@ -192,11 +187,38 @@ const styles: Record<string, React.CSSProperties> = {
     textDecoration: "none",
     border: "1px solid transparent",
     borderRadius: 999,
-    padding: "9px 13px",
-    fontSize: 12,
+    padding: "9px 12px",
+    fontSize: 11,
     fontWeight: 850,
     transition: "all 0.2s ease",
     whiteSpace: "nowrap",
+  },
+  search: {
+    minHeight: 44,
+    display: "grid",
+    gridTemplateColumns: "1fr auto",
+    gap: 6,
+    border: `1px solid ${theme.border}`,
+    borderRadius: 999,
+    padding: 5,
+    background: "rgba(255,255,255,0.055)",
+  },
+  searchInput: {
+    minWidth: 0,
+    border: "none",
+    background: "transparent",
+    color: theme.textPrimary,
+    padding: "0 12px",
+    fontWeight: 800,
+  },
+  searchButton: {
+    border: "none",
+    borderRadius: 999,
+    background: theme.gradient,
+    color: "#fff",
+    padding: "0 14px",
+    fontWeight: 950,
+    cursor: "pointer",
   },
   activeGlow: {
     position: "absolute",
@@ -209,7 +231,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: `1px solid ${theme.danger}45`,
     background: `${theme.danger}12`,
     color: theme.danger,
-    borderRadius: 12,
+    borderRadius: 8,
     padding: "11px 16px",
     cursor: "pointer",
     fontWeight: 900,

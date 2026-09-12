@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import PublicPageShell from "@/components/home/PublicPageShell";
 import {
   exercises,
+  exerciseImageForExercise,
   getExerciseBySlug,
   getRelatedExercises,
 } from "@/lib/exercise-data";
@@ -24,7 +25,15 @@ export default async function ExerciseDetailPage({
 
   return (
     <PublicPageShell>
-      <section className="if-section if-hero">
+      <section
+        className="if-section if-hero"
+        style={{
+          backgroundImage: `linear-gradient(90deg, rgba(10,10,15,0.9), rgba(10,10,15,0.52)), url(${exerciseImageForExercise(exercise)})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: 500,
+        }}
+      >
         <div>
           <p className="if-kicker">{exercise.muscleGroup} Exercise</p>
           <h1 className="if-title">{exercise.name}</h1>
@@ -134,9 +143,19 @@ export default async function ExerciseDetailPage({
             <Link
               key={item.slug}
               href={`/exercise/${item.slug}`}
-              className="if-card"
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
+            className="if-card"
+            style={{ color: "inherit", textDecoration: "none" }}
+          >
+              <div
+                style={{
+                  minHeight: 120,
+                  borderRadius: 10,
+                  marginBottom: 14,
+                  backgroundImage: `linear-gradient(180deg, rgba(10,10,15,0.1), rgba(10,10,15,0.72)), url(${exerciseImageForExercise(item)})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
               <span className="if-tag">{item.muscleGroup}</span>
               <h3>{item.name}</h3>
               <p>{item.mainBenefit}</p>

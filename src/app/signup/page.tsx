@@ -13,6 +13,13 @@ export default function SignupPage() {
     fullName: "",
     email: "",
     password: "",
+    phone: "",
+    dateOfBirth: "",
+    gender: "",
+    heightCm: "",
+    weightKg: "",
+    address: "",
+    emergencyContact: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -91,15 +98,27 @@ export default function SignupPage() {
           }
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          style={inputStyle}
-          value={form.password}
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
+        <input type="password" placeholder="Password" style={inputStyle} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+
+        <div style={twoColumnStyle}>
+          <input type="date" aria-label="Date of birth" style={inputStyle} value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} />
+          <select style={inputStyle} value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
+            <option value="">Sex</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Other">Other</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+        </div>
+
+        <div style={twoColumnStyle}>
+          <input type="number" min="1" placeholder="Height cm" style={inputStyle} value={form.heightCm} onChange={(e) => setForm({ ...form, heightCm: e.target.value })} />
+          <input type="number" min="1" placeholder="Weight kg" style={inputStyle} value={form.weightKg} onChange={(e) => setForm({ ...form, weightKg: e.target.value })} />
+        </div>
+
+        <input placeholder="Phone number" style={inputStyle} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+        <input placeholder="Address" style={inputStyle} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+        <input placeholder="Emergency contact" style={inputStyle} value={form.emergencyContact} onChange={(e) => setForm({ ...form, emergencyContact: e.target.value })} />
 
         <motion.button
           whileHover={{ scale: 1.03 }}
@@ -186,6 +205,12 @@ const linkStyle = {
   color: theme.accent,
   cursor: "pointer",
   fontWeight: 600,
+};
+
+const twoColumnStyle = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 12,
 };
 
 const successStyle = {

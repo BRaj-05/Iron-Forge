@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { nutritionPlans } from "@/lib/cardio-nutrition-data";
+import { NUTRITION_IMAGE_URLS } from "@/lib/media";
 import { theme } from "@/lib/theme";
 
 type MealKey = "breakfast" | "lunch" | "snack" | "dinner";
@@ -32,6 +33,7 @@ export default function CustomerDietPage() {
     if (typeof window === "undefined") return 4;
     return Number(window.localStorage.getItem("iron-forge-water") || 4);
   });
+  const [status, setStatus] = useState("");
 
   const selectedPlan = useMemo(
     () => nutritionPlans.find((plan) => plan.slug === selectedSlug) || nutritionPlans[0],
@@ -51,6 +53,27 @@ export default function CustomerDietPage() {
   }
 
   const completed = Object.values(meals).filter(Boolean).length;
+
+  async function saveDietHistory() {
+    if (!selectedPlan) return;
+    setStatus("");
+    const response = await fetch("/api/customer/diet-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        meals: (Object.keys(selectedPlan.meals) as MealKey[]).map((key) => ({
+          name: mealLabels[key],
+          food: selectedPlan.meals[key],
+          done: meals[key],
+        })),
+        waterCups: water,
+        completed: completed >= 3,
+        notes: `${selectedPlan.name} saved from diet page.`,
+      }),
+    });
+    const payload = await response.json();
+    setStatus(response.ok ? "Diet history saved for today." : payload.error || "Could not save diet.");
+  }
 
   return (
     <div style={styles.page}>
@@ -92,19 +115,31 @@ export default function CustomerDietPage() {
           <strong>{completed}/4</strong>
           <small>{completed < 3 ? "Do not let the day get away from you." : "Nice, the basics are protected."}</small>
         </div>
+        <button onClick={saveDietHistory} style={styles.saveButton}>Save diet history</button>
       </section>
 
+      {status && <div style={styles.message}>{status}</div>}
+
       {selectedPlan && (
-        <section style={styles.planGrid}>
-          {(Object.keys(selectedPlan.meals) as MealKey[]).map((key) => (
-            <article
-              key={key}
-              style={{
-                ...styles.mealCard,
-                borderColor: meals[key] ? `${theme.green}88` : theme.border,
-              }}
-            >
-              <div style={styles.mealHeader}>
+        <section style={styles.planShell}>
+          <div
+            style={{
+              ...styles.planPhoto,
+              backgroundImage: `linear-gradient(180deg, rgba(10,10,15,0.04), rgba(10,10,15,0.78)), url(${NUTRITION_IMAGE_URLS[selectedPlan.slug] || NUTRITION_IMAGE_URLS["maintenance-habit-plan"]})`,
+            }}
+          >
+            <span style={styles.photoTag}>{selectedPlan.goal}</span>
+            <h2>{selectedPlan.name}</h2>
+          </div>
+          <div style={styles.planGrid}>
+            {(Object.keys(selectedPlan.meals) as MealKey[]).map((key) => (
+              <article
+                key={key}
+                style={{
+                  ...styles.mealCard,
+                  borderColor: meals[key] ? `${theme.green}88` : theme.border,
+                }}
+              >
                 <div>
                   <p style={styles.mealLabel}>{mealLabels[key]}</p>
                   <h2>{selectedPlan.meals[key]}</h2>
@@ -119,9 +154,9 @@ export default function CustomerDietPage() {
                 >
                   {meals[key] ? "Done" : "Mark"}
                 </button>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))}
+          </div>
         </section>
       )}
 
@@ -145,7 +180,7 @@ export default function CustomerDietPage() {
 const styles: Record<string, CSSProperties> = {
   page: { padding: 32 },
   hero: {
-    borderRadius: 28,
+    borderRadius: 14,
     border: `1px solid ${theme.border}`,
     padding: 34,
     marginBottom: 22,
@@ -153,14 +188,14 @@ const styles: Record<string, CSSProperties> = {
       "radial-gradient(circle at 85% 16%, rgba(251,191,36,0.22), transparent 30%), linear-gradient(135deg,#111118,#120f07)",
   },
   eyebrow: { color: theme.gold, fontSize: 10, letterSpacing: 4, fontWeight: 950 },
-  title: { fontSize: "clamp(42px, 6vw, 82px)", lineHeight: 0.95, maxWidth: 940, margin: "12px 0" },
+  title: { fontSize: "clamp(34px, 5vw, 66px)", lineHeight: 1, maxWidth: 940, margin: "12px 0" },
   copy: { color: theme.textSecondary, lineHeight: 1.75, maxWidth: 820 },
-  controls: { display: "grid", gridTemplateColumns: "1.4fr .8fr .8fr", gap: 16, marginBottom: 18 },
+  controls: { display: "grid", gridTemplateColumns: "1.3fr .75fr .75fr auto", gap: 14, marginBottom: 18, alignItems: "stretch" },
   select: {
     width: "100%",
     marginTop: 10,
     border: `1px solid ${theme.border}`,
-    borderRadius: 16,
+    borderRadius: 8,
     background: theme.surface,
     color: theme.textPrimary,
     padding: 16,
@@ -168,7 +203,7 @@ const styles: Record<string, CSSProperties> = {
   },
   waterCard: {
     border: `1px solid ${theme.border}`,
-    borderRadius: 18,
+    borderRadius: 10,
     background: theme.surface,
     padding: 18,
     display: "grid",
@@ -177,19 +212,23 @@ const styles: Record<string, CSSProperties> = {
   smallButton: {
     width: 38,
     height: 34,
-    borderRadius: 10,
+    borderRadius: 8,
     border: `1px solid ${theme.border}`,
     background: theme.surfaceAlt,
     color: theme.textPrimary,
     cursor: "pointer",
     marginRight: 8,
   },
-  planGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 },
-  mealCard: { border: `1px solid ${theme.border}`, borderRadius: 20, background: theme.surface, padding: 18 },
-  mealHeader: { display: "flex", justifyContent: "space-between", gap: 14 },
+  saveButton: { border: "none", borderRadius: 8, background: theme.gradient, color: "#fff", fontWeight: 950, padding: "0 16px", cursor: "pointer" },
+  message: { border: `1px solid ${theme.green}55`, background: `${theme.green}12`, color: theme.green, borderRadius: 8, padding: 13, marginBottom: 18 },
+  planShell: { display: "grid", gridTemplateColumns: "minmax(280px, 0.65fr) minmax(0, 1fr)", gap: 18, alignItems: "stretch" },
+  planPhoto: { minHeight: 520, borderRadius: 14, border: `1px solid ${theme.border}`, backgroundSize: "cover", backgroundPosition: "center", padding: 24, display: "grid", alignContent: "end", overflow: "hidden" },
+  photoTag: { color: theme.gold, textTransform: "uppercase", letterSpacing: 3, fontWeight: 950, fontSize: 11 },
+  planGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(220px, 1fr))", gap: 14 },
+  mealCard: { border: `1px solid ${theme.border}`, borderRadius: 10, background: theme.surface, padding: 18, minHeight: 150, display: "grid", gridTemplateColumns: "1fr auto", gap: 14, alignItems: "start", transition: "transform 0.22s ease, border-color 0.22s ease" },
   mealLabel: { color: theme.textMuted, textTransform: "uppercase", fontSize: 12 },
-  markButton: { border: `1px solid ${theme.border}`, borderRadius: 12, padding: "9px 12px", cursor: "pointer", fontWeight: 950, alignSelf: "flex-start" },
-  notes: { marginTop: 18, border: `1px solid ${theme.border}`, borderRadius: 24, background: theme.surfaceAlt, padding: 24 },
+  markButton: { border: `1px solid ${theme.border}`, borderRadius: 8, padding: "9px 12px", cursor: "pointer", fontWeight: 950, alignSelf: "flex-start" },
+  notes: { marginTop: 18, border: `1px solid ${theme.border}`, borderRadius: 12, background: theme.surfaceAlt, padding: 24 },
   sectionTitle: { fontSize: 36, margin: "8px 0" },
   noteGrid: { display: "flex", flexWrap: "wrap", gap: 10, marginTop: 18 },
 };

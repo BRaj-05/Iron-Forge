@@ -234,10 +234,17 @@ textarea:focus {
 .if-card {
   background: linear-gradient(145deg, rgba(32, 36, 47, 0.92), rgba(17, 17, 24, 0.92));
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 22px;
+  border-radius: 12px;
   padding: 24px;
   position: relative;
   overflow: hidden;
+  transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+}
+
+.if-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(249, 115, 22, 0.42);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
 }
 
 .if-card::before {
@@ -281,7 +288,7 @@ textarea:focus {
 
 .if-photo-card {
   min-height: 420px;
-  border-radius: 26px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -399,6 +406,21 @@ textarea:focus {
   animation: ifFloat 5s ease-in-out infinite;
 }
 
+@keyframes ifFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ifSlideUp {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ifKenBurns {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
 @media (max-width: 980px) {
   .if-nav {
     grid-template-columns: 1fr;
@@ -412,6 +434,22 @@ textarea:focus {
 
   .if-footer {
     grid-template-columns: 1fr;
+  }
+
+  [style*="grid-template-columns: 190px minmax(260px, 1fr) minmax(220px, 300px) auto"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="grid-template-columns: minmax(280px, 0.65fr) minmax(0, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="grid-template-columns: minmax(260px, 1fr) repeat(2, minmax(180px, 0.35fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="grid-template-columns: 0.95fr 1fr"] {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -430,5 +468,12 @@ textarea:focus {
 
   .if-row {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  [style*="grid-template-columns: repeat(2, minmax(220px, 1fr))"],
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns: 1.3fr .75fr .75fr auto"],
+  [style*="grid-template-columns: minmax(150px, 1fr) 72px 72px 82px"] {
+    grid-template-columns: 1fr !important;
   }
 }

@@ -20,6 +20,21 @@ enum SubStatus {
   CANCELLED
 }
 
+enum SupportRequestType {
+  TRAINER_CHANGE
+  EQUIPMENT_COMPLAINT
+  EXERCISE_COMPLAINT
+  SESSION_REQUEST
+  GENERAL_SUPPORT
+}
+
+enum SupportRequestStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
+
 model User {
   id                  String    @id @default(auto()) @map("_id") @db.ObjectId
   name                String
@@ -31,6 +46,8 @@ model User {
   address             String?
   dateOfBirth         DateTime?
   gender              String?
+  heightCm            Float?
+  weightKg            Float?
   emergencyContact    String?
   isActive            Boolean   @default(true)
   createdAt           DateTime  @default(now())
@@ -76,8 +93,52 @@ model Attendance {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   customerId String    @db.ObjectId
   trainerId  String?   @db.ObjectId
+  logDate    String
   checkIn    DateTime  @default(now())
   checkOut   DateTime?
+
+  @@unique([customerId, logDate])
+}
+
+model DailyWorkoutLog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId  String   @db.ObjectId
+  trainerId   String?  @db.ObjectId
+  logDate     String
+  workoutName String
+  exercises   Json
+  completed   Boolean  @default(false)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([customerId, logDate])
+}
+
+model DailyDietLog {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String   @db.ObjectId
+  logDate    String
+  meals      Json
+  waterCups  Int      @default(0)
+  notes      String?
+  completed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([customerId, logDate])
+}
+
+model BodyMetricLog {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String   @db.ObjectId
+  logDate    String
+  weightKg   Float?
+  heightCm   Float?
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  @@unique([customerId, logDate])
 }
 
 model Notification {
@@ -87,4 +148,17 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model SupportRequest {
+  id                String               @id @default(auto()) @map("_id") @db.ObjectId
+  requesterId       String               @db.ObjectId
+  assignedTrainerId String?              @db.ObjectId
+  type              SupportRequestType
+  subject           String
+  message           String
+  relatedSlug       String?
+  status            SupportRequestStatus @default(OPEN)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
 }

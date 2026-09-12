@@ -1,42 +1,28 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import Attendance from "@/models/Attendance";
-import { getTokenFromRequest, verifyAccessToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { requireRole } from "@/lib/session";
 
-export async function GET(req: Request) {
-  try {
-    await connectDB();
+export async function GET(request: Request) {
+  const auth = await requireRole(request, ["CUSTOMER"]);
+  if (auth.response || !auth.session) return auth.response;
 
-    const token = getTokenFromRequest(req);
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const last30Days = new Date();
+  last30Days.setDate(last30Days.getDate() - 30);
 
-    let decoded;
-    try {
-      decoded = verifyAccessToken(token);
-    } catch {
-      return NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 },
-      );
-    }
+  const attendance = await prisma.attendance.findMany({
+    where: {
+      customerId: auth.session.userId,
+      checkIn: { gte: last30Days },
+    },
+    orderBy: { checkIn: "desc" },
+  });
 
-    const last30Days = new Date();
-    last30Days.setDate(last30Days.getDate() - 30);
-
-    const attendance = await Attendance.find({
-      userId: decoded.id,
-      checkInTime: { $gte: last30Days },
-    }).lean();
-
-    return NextResponse.json(attendance);
-  } catch (error) {
-    console.error("Attendance history error:", error);
-
-    return NextResponse.json(
-      { error: "Failed to fetch attendance" },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json(
+    attendance.map((item) => ({
+      id: item.id,
+      checkInTime: item.checkIn,
+      checkOutTime: item.checkOut,
+      logDate: item.logDate,
+    })),
+  );
 }

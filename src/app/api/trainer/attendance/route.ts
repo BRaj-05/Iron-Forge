@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { dateKey } from "@/lib/daily";
 import { requireRole } from "@/lib/session";
 
 const AttendanceSchema = z.object({
@@ -30,9 +32,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ attendance });
   }
 
-  const attendance = await prisma.attendance.create({
-    data: { customerId: parsed.data.customerId, trainerId: trainer.id },
-  });
+  try {
+    const attendance = await prisma.attendance.create({
+      data: {
+        customerId: parsed.data.customerId,
+        trainerId: trainer.id,
+        logDate: dateKey(),
+      },
+    });
 
-  return NextResponse.json({ attendance }, { status: 201 });
+    return NextResponse.json({ attendance }, { status: 201 });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ error: "This customer is already checked in today." }, { status: 409 });
+    }
+    throw error;
+  }
 }

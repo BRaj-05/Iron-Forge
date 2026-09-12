@@ -22,12 +22,32 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   if (!parsed.success) return NextResponse.json({ error: "Invalid user payload." }, { status: 400 });
 
   const { id } = await context.params;
+  const existing = await prisma.user.findUnique({ where: { id } });
+  if (!existing) return NextResponse.json({ error: "User not found." }, { status: 404 });
+
   const user = await prisma.user.update({ where: { id }, data: parsed.data });
 
+  if (parsed.data.assignedTrainerId !== undefined && existing.assignedTrainerId) {
+    const previousTrainer = await prisma.user.findUnique({ where: { id: existing.assignedTrainerId } });
+    if (previousTrainer) {
+      await prisma.user.update({
+        where: { id: previousTrainer.id },
+        data: {
+          assignedCustomerIds: previousTrainer.assignedCustomerIds.filter((customerId) => customerId !== id),
+        },
+      });
+    }
+  }
+
   if (parsed.data.assignedTrainerId) {
+    const trainer = await prisma.user.findUnique({ where: { id: parsed.data.assignedTrainerId } });
+    if (!trainer || trainer.role !== "TRAINER") {
+      return NextResponse.json({ error: "Trainer not found." }, { status: 404 });
+    }
+
     await prisma.user.update({
-      where: { id: parsed.data.assignedTrainerId },
-      data: { assignedCustomerIds: { push: id } },
+      where: { id: trainer.id },
+      data: { assignedCustomerIds: Array.from(new Set([...trainer.assignedCustomerIds, id])) },
     });
   }
 
