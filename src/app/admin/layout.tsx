@@ -10,7 +10,7 @@ export default function AdminLayout({
 }) {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar role="ADMIN" />
+      <Sidebar role="OWNER" />
 
       <div style={{ flex: 1 }}>
         {children}

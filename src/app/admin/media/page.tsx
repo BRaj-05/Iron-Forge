@@ -230,7 +230,10 @@ export default function AdminMediaPage() {
   }
 
   useEffect(() => {
-    fetchImages();
+    const timer = window.setTimeout(() => {
+      void fetchImages();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   async function saveUploadedImage(upload: {

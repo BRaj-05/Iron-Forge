@@ -30,7 +30,7 @@ export default function SignupPage() {
     setVerificationLink("");
 
     try {
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -44,11 +44,8 @@ export default function SignupPage() {
         return;
       }
 
-      if (data.verificationUrl) {
-        setVerificationLink(data.verificationUrl);
-      } else {
-        router.push("/login");
-      }
+      setVerificationLink("");
+      router.push("/login");
 
     } catch {
       setError("Server error. Try again.");
@@ -61,7 +58,7 @@ export default function SignupPage() {
     <div style={wrapperStyle}>
       <GlowCard accent={theme.accent}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <h1 style={titleStyle}>JOIN THE FORGE 🔥</h1>
+          <h1 style={titleStyle}>JOIN THE FORGE</h1>
           <p style={{ color: theme.textSecondary }}>
             Create your fitness account
           </p>
@@ -73,14 +70,7 @@ export default function SignupPage() {
           </div>
         )}
 
-        {verificationLink && (
-          <div style={successStyle}>
-            Account created. Open this link once to verify your email:
-            <a href={verificationLink} style={verifyLinkStyle}>
-              Verify email now
-            </a>
-          </div>
-        )}
+        {verificationLink && <div style={successStyle}>{verificationLink}</div>}
 
         <input
           placeholder="Full Name"
@@ -206,11 +196,4 @@ const successStyle = {
   marginBottom: 14,
   color: "#86efac",
   fontSize: 12,
-};
-
-const verifyLinkStyle = {
-  display: "block",
-  color: theme.accent,
-  marginTop: 8,
-  wordBreak: "break-all" as const,
 };

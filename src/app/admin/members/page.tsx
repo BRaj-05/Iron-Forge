@@ -32,7 +32,10 @@ export default function MembersPage() {
   }
 
   useEffect(() => {
-    fetchMembers();
+    const timer = window.setTimeout(() => {
+      void fetchMembers();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   if (loading)

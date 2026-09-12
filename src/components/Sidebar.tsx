@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { theme } from "@/lib/theme";
 
-type Role = "ADMIN" | "CUSTOMER";
+type Role = "OWNER" | "CUSTOMER" | "TRAINER";
 
 interface SidebarProps {
   role: Role;
@@ -16,10 +16,14 @@ const navItems: Array<{
   path: string;
   roles: Role[];
 }> = [
-  { label: "Dashboard", icon: "DB", path: "/admin/dashboard", roles: ["ADMIN"] },
-  { label: "Members", icon: "MB", path: "/admin/members", roles: ["ADMIN"] },
-  { label: "Analytics", icon: "AN", path: "/admin/analytics", roles: ["ADMIN"] },
-  { label: "Media", icon: "IM", path: "/admin/media", roles: ["ADMIN"] },
+  { label: "Dashboard", icon: "DB", path: "/admin", roles: ["OWNER"] },
+  { label: "Users", icon: "US", path: "/admin#users", roles: ["OWNER"] },
+  { label: "Trainers", icon: "TR", path: "/admin#trainers", roles: ["OWNER"] },
+  { label: "Plans", icon: "PL", path: "/admin#plans", roles: ["OWNER"] },
+  { label: "Payments", icon: "PY", path: "/admin#payments", roles: ["OWNER"] },
+  { label: "Attendance", icon: "AT", path: "/admin#attendance", roles: ["OWNER"] },
+  { label: "Notifications", icon: "NT", path: "/admin#notifications", roles: ["OWNER"] },
+  { label: "Dashboard", icon: "DB", path: "/trainer", roles: ["TRAINER"] },
   {
     label: "Dashboard",
     icon: "DB",
@@ -89,7 +93,7 @@ export default function Sidebar({ role }: SidebarProps) {
             letterSpacing: 2,
           }}
         >
-          {role === "ADMIN" ? "ADMIN CONTROL" : "MEMBER ZONE"}
+          {role === "OWNER" ? "OWNER CONTROL" : role === "TRAINER" ? "TRAINER ZONE" : "MEMBER ZONE"}
         </p>
       </div>
 

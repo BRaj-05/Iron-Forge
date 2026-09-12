@@ -9,8 +9,9 @@ import { theme } from "@/lib/theme";
 type LoginField = "email" | "password";
 
 const demoAccounts = [
-  { label: "Admin", email: "admin@gym.com", password: "admin123" },
-  { label: "Customer", email: "user@gym.com", password: "user123" },
+  { label: "Owner", email: "owner@gym.com", password: "owner12345" },
+  { label: "Trainer", email: "trainer@gym.com", password: "trainer12345" },
+  { label: "Customer", email: "customer@gym.com", password: "customer12345" },
 ];
 
 export default function LoginPage() {
@@ -48,9 +49,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push(
-        data.user.role === "ADMIN" ? "/admin/dashboard" : "/customer/dashboard",
-      );
+      router.push(data.redirectTo || "/customer/dashboard");
     } catch {
       setError("Server error. Try again.");
     } finally {
@@ -143,11 +142,7 @@ export default function LoginPage() {
           <div style={styles.errorBox}>
             {error}
             {error === "Email not verified." && (
-              <button
-                type="button"
-                onClick={handleResendVerification}
-                style={styles.inlineButton}
-              >
+              <button type="button" onClick={handleResendVerification} style={styles.inlineButton}>
                 Resend verification link
               </button>
             )}
@@ -383,7 +378,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   demoGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(3, 1fr)",
     gap: 10,
     marginBottom: 18,
   },

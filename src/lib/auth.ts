@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 
 export type AuthTokenPayload = {
   id: string;
-  role?: "ADMIN" | "CUSTOMER" | "TRAINER" | "STAFF" | "MANAGER";
+  userId?: string;
+  role?: "ADMIN" | "CUSTOMER" | "TRAINER" | "STAFF" | "MANAGER" | "OWNER";
   email?: string;
   iat?: number;
   exp?: number;

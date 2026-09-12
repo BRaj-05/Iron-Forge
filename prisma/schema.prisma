@@ -1,0 +1,90 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  TRAINER
+  OWNER
+}
+
+enum SubStatus {
+  ACTIVE
+  EXPIRING_SOON
+  EXPIRED
+  CANCELLED
+}
+
+model User {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  email               String    @unique
+  passwordHash        String
+  role                Role      @default(CUSTOMER)
+  phone               String?
+  photoUrl            String?
+  address             String?
+  dateOfBirth         DateTime?
+  gender              String?
+  emergencyContact    String?
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  specialization      String?
+  bio                 String?
+  experienceYrs       Int?
+  assignedCustomerIds String[]  @db.ObjectId
+  assignedTrainerId   String?   @db.ObjectId
+}
+
+model MembershipPlan {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  durationDays Int
+  price        Float
+  features     String[]
+  isActive     Boolean @default(true)
+}
+
+model Subscription {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  planId    String    @db.ObjectId
+  startDate DateTime  @default(now())
+  endDate   DateTime
+  status    SubStatus @default(ACTIVE)
+  autoRenew Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}
+
+model Payment {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String   @db.ObjectId
+  amount         Float
+  method         String
+  status         String
+  subscriptionId String?  @db.ObjectId
+  createdAt      DateTime @default(now())
+}
+
+model Attendance {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String    @db.ObjectId
+  trainerId  String?   @db.ObjectId
+  checkIn    DateTime  @default(now())
+  checkOut   DateTime?
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
