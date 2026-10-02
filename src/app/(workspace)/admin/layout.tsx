@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import WorkspaceShell from "@/components/layout/WorkspaceShell";
+import AccountShell from "@/components/layout/AccountShell";
 
 export default function AdminLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  return <WorkspaceShell role="OWNER">{children}</WorkspaceShell>;
+  return <AccountShell role="OWNER">{children}</AccountShell>;
 }

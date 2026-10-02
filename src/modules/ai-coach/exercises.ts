@@ -14,8 +14,8 @@ export const exerciseConfig: Record<
   PUSH_UP: {
     name: "Push-ups",
     setup: "Place the camera side-on at floor height. Show your whole body.",
-    low: 90,
-    high: 160,
+    low: 105,
+    high: 152,
   },
   BICEPS_CURL: {
     name: "Biceps curls",
@@ -63,6 +63,7 @@ export function analyzePose(
   lockedSide?: number,
 ): (Analysis & { side: number }) | null {
   const lower = id === "SQUAT" || id === "LUNGE";
+  const minimumVisibility = lockedSide === undefined ? 0.65 : 0.52;
   const candidates = [left, right].map((side, index) => {
     const required = lower
       ? [side.shoulder, side.hip, side.knee, side.ankle]
@@ -71,9 +72,8 @@ export function analyzePose(
           side.elbow,
           side.wrist,
           side.hip,
-          ...(id === "PUSH_UP" ? [side.ankle] : []),
         ];
-    if (!required.every((key) => visible(points[key]))) return null;
+    if (!required.every((key) => visible(points[key], minimumVisibility))) return null;
     const angle = lower
       ? calculateAngle(
           points[side.hip],
@@ -113,6 +113,7 @@ export function analyzePose(
   const shoulder = points[side.shoulder],
     hip = points[side.hip];
   const lean = torsoLean(shoulder, hip, aspect);
+  let bodyAngle: number | null = null;
   const issues: Analysis["issues"] = [];
   const issue = (type: string, message: string) =>
     issues.push({ type, message });
@@ -129,18 +130,21 @@ export function analyzePose(
   if (id === "SHOULDER_PRESS" && lean > 25)
     issue("BACK_LEAN", "Avoid leaning backward; keep your core tight.");
   if (id === "PUSH_UP") {
-    const alignment = calculateAngle(shoulder, hip, points[side.ankle], aspect);
-    if (alignment === null) return null;
-    if (alignment < 155)
+    const support = visible(points[side.ankle], 0.5)
+      ? points[side.ankle]
+      : visible(points[side.knee], 0.5)
+        ? points[side.knee]
+        : null;
+    if (support) bodyAngle = calculateAngle(shoulder, hip, support, aspect);
+    if (bodyAngle !== null && bodyAngle < 150)
       issue(
         "HIP_ALIGNMENT",
         "Keep your hips aligned with your shoulders and ankles.",
       );
     // Upright elbow curls must not be mistaken for push-ups.
-    if (
-      Math.abs(shoulder.x - points[side.ankle].x) * aspect <
-      Math.abs(shoulder.y - points[side.ankle].y)
-    )
+    const horizontal = Math.abs(shoulder.x - hip.x) * aspect;
+    const vertical = Math.abs(shoulder.y - hip.y);
+    if (horizontal < Math.max(0.08, vertical * 0.85))
       return null;
   }
   const config = exerciseConfig[id];
@@ -149,6 +153,8 @@ export function analyzePose(
   return {
     side: index,
     angle,
+    bodyAngle,
+    peakGate: overhead,
     issues,
     start: press ? angle < config.low : angle > config.high,
     peak: press ? angle > config.high && overhead : angle < config.low,

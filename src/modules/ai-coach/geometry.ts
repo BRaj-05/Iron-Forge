@@ -1,11 +1,11 @@
 import type { Point } from "./types";
 
-export function visible(point?: Point): point is Point {
+export function visible(point?: Point, minimum = 0.7): point is Point {
   return (
     !!point &&
     Number.isFinite(point.x) &&
     Number.isFinite(point.y) &&
-    (point.visibility ?? 0) >= 0.7 &&
+    (point.visibility ?? 0) >= minimum &&
     point.x >= 0 &&
     point.x <= 1 &&
     point.y >= 0 &&

@@ -161,10 +161,37 @@ textarea:focus {
 }
 
 .if-title {
-  font-size: clamp(44px, 8vw, 116px);
-  line-height: 0.9;
+  font-size: clamp(44px, 6.4vw, 92px);
+  line-height: 0.94;
   letter-spacing: -0.04em;
   max-width: 1030px;
+}
+
+/* Shared website header + compact account navigation */
+.account-shell { min-height: 100vh; color: #252421; background: #f6f4ef; }
+.account-shell .if-shared-header { position: sticky !important; top: 0; }
+.account-nav-bar { min-height: 58px; padding: 9px clamp(18px, 4vw, 56px); position: sticky; top: 76px; z-index: 34; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid #dedad1; background: rgba(250,248,244,.94); backdrop-filter: blur(18px); }
+.account-nav { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.account-nav > a, .account-more > button { min-height: 38px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 9px; color: #6c6860; background: transparent; font: inherit; font-size: 12px; font-weight: 750; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.account-nav > a:hover, .account-nav > a.is-active, .account-more > button:hover, .account-more > button[aria-expanded="true"] { color: #c95310; background: #fff0e6; }
+.account-more { position: relative; }
+.account-more-menu { position: absolute; top: calc(100% + 12px); right: 0; width: min(520px, calc(100vw - 32px)); padding: 16px; border: 1px solid #ddd7cd; border-radius: 16px; background: rgba(255,255,255,.99); box-shadow: 0 24px 70px rgba(42,32,20,.2); }
+.account-more-menu > p { margin: 0 0 10px; color: #9a958c; font-size: 10px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+.account-more-menu > div { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.account-more-menu a { min-height: 46px; padding: 0 12px; display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 8px; border-radius: 10px; color: #555149; text-decoration: none; font-size: 12px; font-weight: 700; }
+.account-more-menu a:hover, .account-more-menu a.is-active { color: #cf5814; background: #fff1e8; transform: translateX(2px); }
+.account-signout { min-height: 38px; padding: 0 12px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid #ded9d0; border-radius: 9px; color: #625e56; background: #fff; cursor: pointer; }
+.account-content { width: 100%; max-width: 1440px; min-height: 70vh; margin: 0 auto; outline: none; }
+@media (max-width: 960px) {
+  .account-nav-bar { top: 70px; overflow: visible; }
+  .account-nav { overflow-x: auto; scrollbar-width: none; }
+  .account-signout { display: none; }
+}
+@media (max-width: 600px) {
+  .account-nav-bar { padding-inline: 10px; }
+  .account-nav > a, .account-more > button { padding-inline: 10px; }
+  .account-more-menu { position: fixed; top: 132px; right: 12px; }
+  .account-more-menu > div { grid-template-columns: 1fr; }
 }
 
 .if-title-sm {

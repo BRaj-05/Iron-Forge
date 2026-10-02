@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import WorkspaceShell from "@/components/layout/WorkspaceShell";
+import AccountShell from "@/components/layout/AccountShell";
 
 export default function TrainerLayout({ children }: { children: ReactNode }) {
-  return <WorkspaceShell role="TRAINER">{children}</WorkspaceShell>;
+  return <AccountShell role="TRAINER">{children}</AccountShell>;
 }

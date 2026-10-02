@@ -38,13 +38,11 @@ export default function CustomerProgressPage() {
 
   return (
     <div style={styles.page}>
-      <FormProgress />
       <Card style={styles.hero}>
         <p style={styles.eyebrow}>PROGRESS LAB</p>
-        <h1 style={styles.title}>Progress from your daily check-ins.</h1>
+        <h1 style={styles.title}>Progress</h1>
         <p style={styles.copy}>
-          Attendance, workout logs, diet history, and body metrics now combine
-          into XP and trend charts your trainer can review.
+          Track performance, consistency and form.
         </p>
       </Card>
 
@@ -97,6 +95,7 @@ export default function CustomerProgressPage() {
           <Link href="/customer/workouts" style={styles.emptyCta}>Open workouts</Link>
         </Card>
       )}
+      <FormProgress />
     </div>
   );
 }
@@ -112,13 +111,13 @@ function Stat({ label, value, accent, suffix = "", signed = false }: { label: st
 }
 
 const styles: Record<string, CSSProperties> = {
-  page: { padding: "clamp(24px, 4vw, 52px)", color: "#292825" },
-  hero: { padding: 32, marginBottom: 22, border: "1px solid #dfdcd4", background: "radial-gradient(circle at 88% 10%, rgba(232,103,29,.13), transparent 32%), rgba(255,255,255,.76)", boxShadow: "none" },
+  page: { padding: "clamp(20px, 3vw, 40px)", color: "#292825" },
+  hero: { padding: "22px 24px", marginBottom: 18, border: "1px solid #dfdcd4", borderLeft: "4px solid #e8671d", background: "rgba(255,255,255,.78)", boxShadow: "none" },
   eyebrow: { color: theme.accent, fontSize: 10, letterSpacing: 4, fontWeight: 950 },
-  title: { color: "#1c1b19", fontFamily: "Georgia, serif", fontWeight: 500, fontSize: "clamp(34px, 5vw, 64px)", lineHeight: 1, maxWidth: 920, margin: "12px 0" },
-  copy: { color: "#76736c", lineHeight: 1.75, maxWidth: 820 },
-  stats: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 18 },
-  stat: { borderTop: "4px solid", borderColor: "#dfdcd4", padding: 20, display: "grid", gap: 8, background: "rgba(255,255,255,.78)", color: "#292825", boxShadow: "none" },
+  title: { color: "#1c1b19", fontWeight: 800, fontSize: "clamp(30px, 4vw, 44px)", lineHeight: 1.05, margin: "7px 0" },
+  copy: { color: "#76736c", lineHeight: 1.5 },
+  stats: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 18 },
+  stat: { minHeight: 112, borderTop: "3px solid", borderColor: "#dfdcd4", padding: 18, display: "grid", alignContent: "center", gap: 8, background: "rgba(255,255,255,.82)", color: "#292825", boxShadow: "none" },
   chartGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 18 },
   panel: { padding: 24, borderColor: "#dfdcd4", background: "rgba(255,255,255,.78)", color: "#292825", boxShadow: "none" },
   sectionTitle: { color: "#292825", fontFamily: "Georgia, serif", fontWeight: 500, fontSize: 34, margin: "8px 0 18px" },

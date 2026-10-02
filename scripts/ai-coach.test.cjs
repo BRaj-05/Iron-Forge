@@ -89,7 +89,49 @@ test("low confidence and brief threshold crossings never count", () => {
   assert.equal(result.reps, 0);
   const hidden = pose("SQUAT", 175).map((p) => ({ ...p, visibility: 0.2 }));
   result = engine.update(hidden, 5100);
+  assert.equal(result.status, "PARTIAL_POSE");
+  result = engine.update(hidden, 5800);
   assert.equal(result.status, "NO_POSE");
+});
+
+test("push-up tolerates one missing frame and counts only after returning to top", () => {
+  const engine = new WorkoutEngine("PUSH_UP");
+  let time = 0, result;
+  const hold = (angle, frames = 8, confidence = 0.99) => {
+    for (let i = 0; i < frames; i++) {
+      const points = pose("PUSH_UP", angle).map((point) => point.visibility ? { ...point, visibility: confidence } : point);
+      result = engine.update(points, (time += 100));
+    }
+  };
+  hold(170);
+  hold(125, 4);
+  hold(85);
+  assert.equal(result.reps, 0, "bottom alone is not a repetition");
+  result = engine.update([], (time += 100));
+  assert.equal(result.status, "PARTIAL_POSE");
+  hold(125, 4, 0.55);
+  hold(170, 8, 0.55);
+  assert.equal(result.reps, 1);
+  hold(151, 5); hold(154, 5); hold(151, 5); hold(154, 5);
+  assert.equal(result.reps, 1, "threshold noise cannot double count");
+});
+
+test("standing elbow curl cannot count as a push-up", () => {
+  const engine = new WorkoutEngine("PUSH_UP");
+  let result, time = 0;
+  for (const angle of [170, 170, 90, 90, 170, 170]) {
+    for (let i = 0; i < 5; i++) {
+      const points = pose("PUSH_UP", angle);
+      for (const offset of [0, 1]) {
+        points[11 + offset] = { x: .4, y: .2, visibility: .99 };
+        points[23 + offset] = { x: .4, y: .5, visibility: .99 };
+        points[25 + offset] = { x: .4, y: .7, visibility: .99 };
+        points[27 + offset] = { x: .4, y: .9, visibility: .99 };
+      }
+      result = engine.update(points, (time += 100));
+    }
+  }
+  assert.equal(result.reps, 0);
 });
 
 test("sustained form warnings lower the score and aggregate once per attempt", () => {
