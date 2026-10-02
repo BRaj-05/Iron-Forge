@@ -112,18 +112,38 @@
   min-height: 90px;
 }
 .progress {
-  margin: 26px 0;
+  margin: 0 0 22px;
   padding: 24px;
-  background: #15181e;
-  color: white;
-  border-radius: 16px;
+  border: 1px solid #dfdcd4;
+  border-radius: 14px;
+  background: rgba(255,255,255,.8);
+  color: #292825;
+  box-shadow: none;
+}
+.progress h2,
+.progress h3 {
+  color: #292825;
+}
+.progress p,
+.progress li,
+.progress span {
+  color: #77736c;
 }
 .progress a {
-  color: #fb923c;
+  color: #df651b;
+  font-weight: 800;
+}
+.progress button {
+  margin-left: 8px;
+  padding: 7px 10px;
+  border: 1px solid #e1ddd5;
+  border-radius: 8px;
+  color: #d85d15;
+  background: #fff3eb;
 }
 .progress ul {
   padding-left: 20px;
-  line-height: 2;
+  line-height: 1.9;
 }
 @media (max-width: 800px) {
   .live {
