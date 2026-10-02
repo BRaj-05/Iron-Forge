@@ -63,10 +63,10 @@ export default function CustomerProgressPage() {
             <div style={styles.chart}>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={data.weekly}>
-                  <CartesianGrid stroke="rgba(255,255,255,0.08)" />
-                  <XAxis dataKey="day" stroke={theme.textSecondary} />
-                  <YAxis stroke={theme.textSecondary} />
-                  <Tooltip contentStyle={{ background: theme.surface, border: `1px solid ${theme.border}` }} />
+                  <CartesianGrid stroke="rgba(35,33,30,0.08)" />
+                  <XAxis dataKey="day" stroke="#8a877f" />
+                  <YAxis stroke="#8a877f" />
+                  <Tooltip contentStyle={{ background: "#fff", color: "#292825", border: "1px solid #dfdcd4", borderRadius: 10 }} />
                   <Area isAnimationActive type="monotone" dataKey="xp" stroke={theme.gold} fill="rgba(251,191,36,0.18)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -78,10 +78,10 @@ export default function CustomerProgressPage() {
             <div style={styles.chart}>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data.body}>
-                  <CartesianGrid stroke="rgba(255,255,255,0.08)" />
-                  <XAxis dataKey="week" stroke={theme.textSecondary} />
-                  <YAxis stroke={theme.textSecondary} />
-                  <Tooltip contentStyle={{ background: theme.surface, border: `1px solid ${theme.border}` }} />
+                  <CartesianGrid stroke="rgba(35,33,30,0.08)" />
+                  <XAxis dataKey="week" stroke="#8a877f" />
+                  <YAxis stroke="#8a877f" />
+                  <Tooltip contentStyle={{ background: "#fff", color: "#292825", border: "1px solid #dfdcd4", borderRadius: 10 }} />
                   <Bar isAnimationActive dataKey="weight" fill="var(--accent)" radius={[8, 8, 0, 0]} />
                   <Bar isAnimationActive dataKey="height" fill="var(--green)" radius={[8, 8, 0, 0]} />
                 </BarChart>
@@ -112,18 +112,18 @@ function Stat({ label, value, accent, suffix = "", signed = false }: { label: st
 }
 
 const styles: Record<string, CSSProperties> = {
-  page: { padding: 32 },
-  hero: { padding: 30, marginBottom: 22, background: "linear-gradient(135deg,#111118,#071016)" },
+  page: { padding: "clamp(24px, 4vw, 52px)", color: "#292825" },
+  hero: { padding: 32, marginBottom: 22, border: "1px solid #dfdcd4", background: "radial-gradient(circle at 88% 10%, rgba(232,103,29,.13), transparent 32%), rgba(255,255,255,.76)", boxShadow: "none" },
   eyebrow: { color: theme.accent, fontSize: 10, letterSpacing: 4, fontWeight: 950 },
-  title: { fontSize: "clamp(34px, 5vw, 64px)", lineHeight: 1, maxWidth: 920, margin: "12px 0" },
-  copy: { color: theme.textSecondary, lineHeight: 1.75, maxWidth: 820 },
+  title: { color: "#1c1b19", fontFamily: "Georgia, serif", fontWeight: 500, fontSize: "clamp(34px, 5vw, 64px)", lineHeight: 1, maxWidth: 920, margin: "12px 0" },
+  copy: { color: "#76736c", lineHeight: 1.75, maxWidth: 820 },
   stats: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 18 },
-  stat: { borderTop: "4px solid", padding: 20, display: "grid", gap: 8 },
+  stat: { borderTop: "4px solid", borderColor: "#dfdcd4", padding: 20, display: "grid", gap: 8, background: "rgba(255,255,255,.78)", color: "#292825", boxShadow: "none" },
   chartGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 18 },
-  panel: { padding: 24 },
-  sectionTitle: { fontSize: 34, margin: "8px 0 18px" },
+  panel: { padding: 24, borderColor: "#dfdcd4", background: "rgba(255,255,255,.78)", color: "#292825", boxShadow: "none" },
+  sectionTitle: { color: "#292825", fontFamily: "Georgia, serif", fontWeight: 500, fontSize: 34, margin: "8px 0 18px" },
   chart: { height: 320 },
-  emptyState: { padding: 32, display: "grid", justifyItems: "start", gap: 12, color: theme.textSecondary },
+  emptyState: { padding: 32, display: "grid", justifyItems: "start", gap: 12, borderColor: "#dfdcd4", background: "rgba(255,255,255,.78)", color: "#76736c", boxShadow: "none" },
   emptyIcon: { width: 56, height: 56, borderRadius: 12, display: "grid", placeItems: "center", background: theme.gradient, color: "#fff", fontWeight: 950 },
   emptyCta: { minHeight: 46, display: "inline-flex", alignItems: "center", borderRadius: 10, background: theme.gradient, color: "#fff", padding: "0 16px", textDecoration: "none", fontWeight: 950 },
 };
