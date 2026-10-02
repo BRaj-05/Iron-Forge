@@ -102,11 +102,11 @@ const exercisePhotoPools: Record<string, string[]> = {
   CORE: [
     "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1571019613576-2b22c76fd955?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1506629905607-d9c297d0805d?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1599447421416-3414500d18a5?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1566241440091-ec10de8db2e1?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?auto=format&fit=crop&w=900&q=85",
   ],
   FULL_BODY: [
@@ -403,6 +403,10 @@ export function getExercisesByMuscle(slug: string) {
 
 export function getExerciseBySlug(slug: string) {
   return exercises.find((exercise) => exercise.slug === slug);
+}
+
+export function exercisePath(exercise: Pick<Exercise, "muscleSlug" | "slug">) {
+  return `/gym/${exercise.muscleSlug}/${exercise.slug}`;
 }
 
 export function getRelatedExercises(exercise: Exercise, limit = 4) {

@@ -1,24 +1,25 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import User from "@/models/User";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+import { prisma } from "@/infrastructure/prisma/client";
+
+const ResetPasswordSchema = z.object({ token: z.string().min(1), password: z.string().min(8) });
 
 export async function POST(req: Request) {
   try {
-    await connectDB();
-
-    const { token, password } = await req.json();
-
-    if (!token || typeof password !== "string" || password.length < 8) {
+    const parsed = ResetPasswordSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid token or password." },
         { status: 400 },
       );
     }
 
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: new Date() },
+    const resetTokenHash = crypto.createHash("sha256").update(parsed.data.token).digest("hex");
+    const user = await prisma.user.findFirst({
+      where: { resetTokenHash, resetTokenExpiresAt: { gt: new Date() } },
+      select: { id: true },
     });
 
     if (!user) {
@@ -28,18 +29,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    user.password = hashed;
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-
-    if (!user.emailVerified) {
-      user.emailVerified = true;
-      user.verificationToken = undefined;
-      user.verificationTokenExpiry = undefined;
-    }
-
-    await user.save();
+    const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash, resetTokenHash: null, resetTokenExpiresAt: null },
+    });
 
     return NextResponse.json({ message: "Password reset successful." });
   } catch (error) {

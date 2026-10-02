@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/infrastructure/prisma/client";
 import { requireRole } from "@/lib/session";
 
 const UpdateUserSchema = z.object({

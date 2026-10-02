@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/infrastructure/prisma/client";
 import { createSessionToken, setSessionCookie } from "@/lib/session";
 import { updateSubscriptionExpiryForUser } from "@/lib/subscriptions";
+import { loginLandingFor } from "@/lib/routing";
 
 const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
-
-function dashboardFor(role: string) {
-  if (role === "OWNER") return "/admin";
-  if (role === "TRAINER") return "/trainer";
-  return "/customer/dashboard";
-}
 
 export async function POST(request: Request) {
   const parsed = LoginSchema.safeParse(await request.json().catch(() => null));
@@ -40,7 +35,7 @@ export async function POST(request: Request) {
   const token = createSessionToken({ userId: user.id, role: user.role });
   const response = NextResponse.json({
     message: "Login successful",
-    redirectTo: dashboardFor(user.role),
+    redirectTo: loginLandingFor(user.role),
     user: {
       id: user.id,
       name: user.name,

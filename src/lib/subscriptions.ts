@@ -1,5 +1,5 @@
 import { SubStatus } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/infrastructure/prisma/client";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

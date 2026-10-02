@@ -4,12 +4,6 @@ type MailResult = {
   id?: string;
 };
 
-type VerificationEmailInput = {
-  to: string;
-  name?: string;
-  verificationUrl: string;
-};
-
 type PasswordResetEmailInput = {
   to: string;
   resetUrl: string;
@@ -73,31 +67,6 @@ function baseEmailShell(content: string) {
       </div>
     </div>
   `;
-}
-
-export async function sendVerificationEmail({
-  to,
-  name,
-  verificationUrl,
-}: VerificationEmailInput) {
-  const greeting = name ? `Hi ${name},` : "Hi,";
-
-  return sendEmail({
-    to,
-    subject: "Verify your Iron Forge account",
-    text: `${greeting} verify your Iron Forge account: ${verificationUrl}`,
-    html: baseEmailShell(`
-      <p style="color:#cbd5e1;font-size:16px;line-height:1.7;margin:0 0 18px">${greeting}</p>
-      <h1 style="font-size:30px;line-height:1.05;margin:0 0 14px">Verify your account</h1>
-      <p style="color:#cbd5e1;font-size:15px;line-height:1.7;margin:0 0 24px">
-        Confirm your email to activate your gym dashboard, missions, scores, and member profile.
-      </p>
-      <a href="${verificationUrl}" style="display:inline-block;background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;text-decoration:none;font-weight:800;border-radius:12px;padding:14px 20px">
-        Verify Email
-      </a>
-      <p style="color:#94a3b8;font-size:12px;line-height:1.6;margin-top:22px;word-break:break-all">${verificationUrl}</p>
-    `),
-  });
 }
 
 export async function sendPasswordResetEmail({

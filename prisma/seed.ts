@@ -9,6 +9,13 @@ async function main() {
   const ownerPassword = process.env.OWNER_SEED_PASSWORD || "owner12345";
   const trainerEmail = "trainer@gym.com";
   const customerEmail = "customer@gym.com";
+  const demoMembers = [
+    { name: "Alex Member", email: customerEmail, days: 7, weightKg: 72, heightCm: 175 },
+    { name: "Riya Sharma", email: "riya@gym.com", days: 5, weightKg: 63, heightCm: 164 },
+    { name: "Kabir Khan", email: "kabir@gym.com", days: 4, weightKg: 81, heightCm: 178 },
+    { name: "Neha Patel", email: "neha@gym.com", days: 3, weightKg: 58, heightCm: 160 },
+    { name: "Arjun Mehta", email: "arjun@gym.com", days: 2, weightKg: 86, heightCm: 181 },
+  ];
 
   const [ownerHash, trainerHash, customerHash] = await Promise.all([
     bcrypt.hash(ownerPassword, 10),
@@ -58,54 +65,127 @@ async function main() {
     },
   });
 
-  const customer = await prisma.user.upsert({
-    where: { email: customerEmail },
-    update: {
-      passwordHash: customerHash,
-      role: Role.CUSTOMER,
-      isActive: true,
-      assignedTrainerId: trainer.id,
-    },
-    create: {
-      name: "Alex Member",
-      email: customerEmail,
-      passwordHash: customerHash,
-      role: Role.CUSTOMER,
-      assignedTrainerId: trainer.id,
-      assignedCustomerIds: [],
-    },
-  });
+  const customers = [];
+  for (const member of demoMembers) {
+    customers.push(
+      await prisma.user.upsert({
+        where: { email: member.email },
+        update: {
+          name: member.name,
+          passwordHash: customerHash,
+          role: Role.CUSTOMER,
+          isActive: true,
+          assignedTrainerId: trainer.id,
+          heightCm: member.heightCm,
+          weightKg: member.weightKg,
+        },
+        create: {
+          name: member.name,
+          email: member.email,
+          passwordHash: customerHash,
+          role: Role.CUSTOMER,
+          assignedTrainerId: trainer.id,
+          assignedCustomerIds: [],
+          heightCm: member.heightCm,
+          weightKg: member.weightKg,
+        },
+      }),
+    );
+  }
 
   await prisma.user.update({
     where: { id: trainer.id },
-    data: { assignedCustomerIds: [customer.id] },
+    data: { assignedCustomerIds: customers.map((customer) => customer.id) },
   });
 
   const activePlan = plans[0];
-  const startDate = new Date();
-  const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + activePlan.durationDays);
+  for (const [index, customer] of customers.entries()) {
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + activePlan.durationDays);
 
-  await prisma.subscription.create({
-    data: {
-      userId: customer.id,
-      planId: activePlan.id,
-      startDate,
-      endDate,
-      status: SubStatus.ACTIVE,
-    },
-  });
+    const existingSubscription = await prisma.subscription.findFirst({
+      where: { userId: customer.id, planId: activePlan.id, status: SubStatus.ACTIVE },
+    });
+    if (!existingSubscription) {
+      await prisma.subscription.create({
+        data: {
+          userId: customer.id,
+          planId: activePlan.id,
+          startDate,
+          endDate,
+          status: SubStatus.ACTIVE,
+        },
+      });
+    }
 
-  await prisma.payment.create({
-    data: {
-      userId: customer.id,
-      amount: activePlan.price,
-      method: "Seed cash",
-      status: "PAID",
-    },
-  });
+    const existingPayment = await prisma.payment.findFirst({
+      where: { userId: customer.id, method: "Seed cash" },
+    });
+    if (!existingPayment) {
+      await prisma.payment.create({
+        data: {
+          userId: customer.id,
+          amount: activePlan.price,
+          method: "Seed cash",
+          status: "PAID",
+        },
+      });
+    }
 
-  console.log(`Seeded owner ${ownerEmail}, trainer ${trainerEmail}, customer ${customerEmail}`);
+    const activeDays = demoMembers[index].days;
+    for (let offset = 0; offset < activeDays; offset += 1) {
+      const date = new Date();
+      date.setHours(9 + index, 0, 0, 0);
+      date.setDate(date.getDate() - offset);
+      const logDate = date.toISOString().slice(0, 10);
+
+      await prisma.attendance.upsert({
+        where: { customerId_logDate: { customerId: customer.id, logDate } },
+        update: { checkIn: date, trainerId: trainer.id },
+        create: { customerId: customer.id, trainerId: trainer.id, logDate, checkIn: date },
+      });
+      if (offset % 2 === 0 || index < 2) {
+        await prisma.dailyWorkoutLog.upsert({
+          where: { customerId_logDate: { customerId: customer.id, logDate } },
+          update: { completed: true, trainerId: trainer.id },
+          create: {
+            customerId: customer.id,
+            trainerId: trainer.id,
+            logDate,
+            workoutName: "Seed strength session",
+            exercises: [{ name: "Bench Press", sets: 3, reps: 10 }],
+            completed: true,
+          },
+        });
+      }
+      if (offset % 3 !== 1) {
+        await prisma.dailyDietLog.upsert({
+          where: { customerId_logDate: { customerId: customer.id, logDate } },
+          update: { completed: true, waterCups: 6 + index },
+          create: {
+            customerId: customer.id,
+            logDate,
+            meals: { breakfast: "Oats", lunch: "Dal rice", dinner: "Paneer roti" },
+            waterCups: 6 + index,
+            completed: true,
+          },
+        });
+      }
+      await prisma.bodyMetricLog.upsert({
+        where: { customerId_logDate: { customerId: customer.id, logDate } },
+        update: { weightKg: demoMembers[index].weightKg - offset * 0.15, heightCm: demoMembers[index].heightCm },
+        create: {
+          customerId: customer.id,
+          logDate,
+          weightKg: demoMembers[index].weightKg - offset * 0.15,
+          heightCm: demoMembers[index].heightCm,
+        },
+      });
+    }
+  }
+
+  console.log(`Seeded owner ${ownerEmail}, trainer ${trainerEmail}, ${customers.length} customers`);
 }
 
 main()

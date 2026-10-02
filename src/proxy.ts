@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getTokenFromRequest, verifyAccessToken } from "@/lib/auth";
 
+import { dashboardFor, normalizeRole } from "@/lib/routing";
+
 const PUBLIC_PATHS = [
   "/login",
   "/signup",
@@ -17,16 +19,13 @@ function isPublicPath(pathname: string) {
   );
 }
 
-function homeFor(role: string) {
-  if (role === "OWNER") return "/admin";
-  if (role === "TRAINER") return "/trainer";
-  return "/customer/dashboard";
-}
-
-function normalizeRole(role?: string) {
-  if (role === "ADMIN") return "OWNER";
-  if (role === "CUSTOMER" || role === "TRAINER" || role === "OWNER") return role;
-  return undefined;
+function unauthenticated(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
+  }
+  const url = new URL("/login", request.url);
+  url.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+  return NextResponse.redirect(url);
 }
 
 export function proxy(request: NextRequest) {
@@ -43,29 +42,38 @@ export function proxy(request: NextRequest) {
 
   const token = getTokenFromRequest(request as unknown as Request);
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return unauthenticated(request);
   }
 
   try {
     const decoded = verifyAccessToken(token);
     const role = normalizeRole(decoded.role);
-    if (!role) return NextResponse.redirect(new URL("/login", request.url));
+    if (!role) return unauthenticated(request);
 
+    if (pathname.startsWith("/api/admin") && role !== "OWNER") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (pathname.startsWith("/api/customer") && role !== "CUSTOMER") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (pathname.startsWith("/api/trainer") && role !== "TRAINER") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     if (pathname.startsWith("/admin") && role !== "OWNER") {
-      return NextResponse.redirect(new URL(homeFor(role), request.url));
+      return NextResponse.redirect(new URL(dashboardFor(role), request.url));
     }
 
     if (pathname.startsWith("/trainer") && role !== "TRAINER") {
-      return NextResponse.redirect(new URL(homeFor(role), request.url));
+      return NextResponse.redirect(new URL(dashboardFor(role), request.url));
     }
 
     if (pathname.startsWith("/customer") && role !== "CUSTOMER") {
-      return NextResponse.redirect(new URL(homeFor(role), request.url));
+      return NextResponse.redirect(new URL(dashboardFor(role), request.url));
     }
 
     return NextResponse.next();
   } catch {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return unauthenticated(request);
   }
 }
 
@@ -75,6 +83,7 @@ export const config = {
     "/trainer/:path*",
     "/customer/:path*",
     "/api/admin/:path*",
-    "/api/protected/:path*",
+    "/api/customer/:path*",
+    "/api/trainer/:path*",
   ],
 };

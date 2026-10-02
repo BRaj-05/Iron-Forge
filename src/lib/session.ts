@@ -2,21 +2,16 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getTokenFromRequest, signAccessToken, verifyAccessToken } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/infrastructure/prisma/client";
+import { APP_ROLES, normalizeRole, type AppRole } from "@/lib/routing";
+export { normalizeRole, type AppRole } from "@/lib/routing";
 
-export const RoleSchema = z.enum(["CUSTOMER", "TRAINER", "OWNER"]);
-export type AppRole = z.infer<typeof RoleSchema>;
+export const RoleSchema = z.enum(APP_ROLES);
 
 export type SessionUser = {
   userId: string;
   role: AppRole;
 };
-
-export function normalizeRole(role?: string) {
-  if (role === "ADMIN") return "OWNER";
-  if (role === "CUSTOMER" || role === "TRAINER" || role === "OWNER") return role;
-  return undefined;
-}
 
 export function createSessionToken(user: SessionUser) {
   return signAccessToken({ userId: user.userId, id: user.userId, role: user.role });

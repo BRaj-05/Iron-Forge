@@ -1,7 +1,7 @@
 import "dotenv/config";
 import mongoose from "mongoose";
-import connectDB from "../lib/db";
-import YogaAsana from "../models/YogaAsana";
+import connectDB from "../infrastructure/mongoose/connection";
+import YogaAsana from "../infrastructure/mongoose/models/YogaAsana";
 import { yogaAsanas } from "../lib/yoga-data";
 
 async function main() {

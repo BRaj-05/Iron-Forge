@@ -1,8 +1,8 @@
 import "dotenv/config";
 import mongoose from "mongoose";
-import connectDB from "../lib/db";
-import CardioWorkout from "../models/CardioWorkout";
-import DietPlan from "../models/DietPlan";
+import connectDB from "../infrastructure/mongoose/connection";
+import CardioWorkout from "../infrastructure/mongoose/models/CardioWorkout";
+import DietPlan from "../infrastructure/mongoose/models/DietPlan";
 import { cardioWorkouts, nutritionPlans } from "../lib/cardio-nutrition-data";
 
 async function main() {

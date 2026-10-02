@@ -1,15 +1,3 @@
-export const publicNavLinks = [
-  { label: "Gym", href: "/gym" },
-  { label: "Yoga", href: "/yoga" },
-  { label: "Cardio", href: "/cardio" },
-  { label: "Nutrition", href: "/nutrition" },
-  { label: "Equipment", href: "/equipment" },
-  { label: "Daily Score", href: "/daily-score" },
-  { label: "Rank", href: "/rank" },
-  { label: "Tasks", href: "/tasks" },
-  { label: "Plans", href: "/plans" },
-];
-
 export const learningPillars = [
   {
     title: "Gym Exercise Library",
@@ -63,8 +51,8 @@ export const planCards = [
     name: "Gym Pro",
     price: "₹1,999",
     tag: "Popular",
-    copy: "Progress tracking, leaderboard rank, calendar, and advanced workout plans.",
-    features: ["Progress charts", "Leaderboard", "Calendar sync"],
+    copy: "Progress tracking, leaderboard rank, trainer requests, and advanced workout plans.",
+    features: ["Progress charts", "Leaderboard", "Trainer requests"],
   },
   {
     name: "Yoga Plan",
@@ -139,5 +127,59 @@ export const faqItems = [
   {
     q: "Does AI work without an API key?",
     a: "The planned AI coach will show rule-based fallback answers if no AI provider key is configured.",
+  },
+];
+
+export const testimonials = [
+  {
+    name: "Member placeholder",
+    quote: "The daily check-in and workout log make it easier to see whether the week is actually moving.",
+    label: "Placeholder quote",
+  },
+  {
+    name: "Beginner placeholder",
+    quote: "The exercise library explains what each movement is for before asking me to train harder.",
+    label: "Placeholder quote",
+  },
+  {
+    name: "Trainer placeholder",
+    quote: "Saved diet and workout notes give the trainer a clearer starting point for follow-up.",
+    label: "Placeholder quote",
+  },
+];
+
+export const blogPosts = [
+  {
+    slug: "how-to-start-strength-training",
+    title: "How to start strength training without guessing",
+    readTime: "4 min read",
+    excerpt: "Begin with machines, learn the target muscle, keep reps controlled, and add load only after the movement looks repeatable.",
+    body: [
+      "A beginner strength plan works best when the first goal is repeatable technique. Start with stable machines or dumbbell patterns before chasing heavy barbell numbers.",
+      "Pick one push, one pull, one squat or hinge, and one core drill. Keep most sets in the 8-12 rep range and stop when form starts changing.",
+      "Progress comes from consistency: add a little weight, one extra rep, or better tempo only when the previous week felt controlled.",
+    ],
+  },
+  {
+    slug: "protein-habits-for-busy-members",
+    title: "Protein habits for busy members",
+    readTime: "3 min read",
+    excerpt: "Use simple anchors: curd, dal, paneer, eggs, tofu, sprouts, chicken, or whey when whole meals are difficult.",
+    body: [
+      "Protein does not need to be complicated. Build each meal around one obvious protein anchor and then add vegetables and a measured carb source.",
+      "For Indian meals, dal with curd, paneer with roti, sprouts, eggs, tofu, or chicken can all work depending on preference and budget.",
+      "The useful habit is visibility: write down meals daily so your trainer can spot patterns instead of guessing from memory.",
+    ],
+  },
+  {
+    slug: "why-incline-walking-works",
+    title: "Why incline walking works for consistency",
+    readTime: "3 min read",
+    excerpt: "Incline walking is simple, joint-friendly for many beginners, and easy to repeat across the week.",
+    body: [
+      "Most fat-loss plans fail because the cardio is too intense to repeat. Incline walking is boring in a useful way: easy to understand and easy to schedule.",
+      "Use a pace where breathing is elevated but still controlled. Twenty-five to forty minutes is enough for many members when combined with strength work and food tracking.",
+      "Pain, dizziness, or unusual symptoms are a stop sign. Adjust incline, speed, or mode, and ask for trainer support when needed.",
+    ],
   },
 ];

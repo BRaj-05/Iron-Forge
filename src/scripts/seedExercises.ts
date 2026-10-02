@@ -1,7 +1,7 @@
 import "dotenv/config";
 import mongoose from "mongoose";
-import connectDB from "../lib/db";
-import Exercise from "../models/Exercise";
+import connectDB from "../infrastructure/mongoose/connection";
+import Exercise from "../infrastructure/mongoose/models/Exercise";
 import { exercises } from "../lib/exercise-data";
 
 async function main() {

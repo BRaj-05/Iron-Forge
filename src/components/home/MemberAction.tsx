@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
-type AuthUser = {
-  id?: string;
-  role?: "ADMIN" | "CUSTOMER";
-};
+import { useAuth } from "@/features/auth/AuthProvider";
+import { dashboardFor } from "@/lib/routing";
 
 type MemberActionProps = {
   href: string;
@@ -20,45 +18,23 @@ export default function MemberAction({
   lockedLabel = "Login to use this",
 }: MemberActionProps) {
   const router = useRouter();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [checked, setChecked] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/protected", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        setUser(data?.user || null);
-        setChecked(true);
-      })
-      .catch(() => {
-        setUser(null);
-        setChecked(true);
-      });
-  }, []);
+  const { user, loading } = useAuth();
+  const checked = !loading;
 
   const isCustomer = user?.role === "CUSTOMER";
 
   return (
-    <button
+    <Button
       type="button"
-      onClick={() => router.push(isCustomer ? href : "/login")}
+      variant={isCustomer ? "success" : "primary"}
+      disabled={loading}
+      onClick={() => router.push(isCustomer ? href : user ? dashboardFor(user.role) : `/login?next=${encodeURIComponent(href)}`)}
       style={{
-        border: "none",
-        borderRadius: 12,
-        background: isCustomer
-          ? "linear-gradient(135deg,#22C55E,#059669)"
-          : "linear-gradient(135deg,#F97316,#EF4444)",
-        color: "#fff",
-        cursor: "pointer",
-        fontWeight: 900,
         padding: "14px 20px",
-        boxShadow: isCustomer
-          ? "0 14px 34px rgba(34,197,94,0.2)"
-          : "0 14px 34px rgba(249,115,22,0.2)",
         opacity: checked ? 1 : 0.72,
       }}
     >
-      {checked && isCustomer ? label : lockedLabel}
-    </button>
+      {loading ? "Loading…" : isCustomer ? label : user ? "Open my dashboard" : lockedLabel}
+    </Button>
   );
 }

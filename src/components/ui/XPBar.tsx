@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { theme } from "../theme";
+import { theme } from "@/lib/theme";
 
 export default function XPBar({ xp, level }: { xp: number; level: number }) {
   const pct = xp % 100;

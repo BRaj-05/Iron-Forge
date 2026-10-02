@@ -3,7 +3,7 @@ import path from "path";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import sharp from "sharp";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/infrastructure/prisma/client";
 import { requireRole } from "@/lib/session";
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;

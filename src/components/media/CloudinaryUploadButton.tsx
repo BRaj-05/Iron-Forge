@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Button from "@/components/ui/Button";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 type CloudinaryUploadResult = {
@@ -57,24 +58,17 @@ export default function CloudinaryUploadButton({
         onChange={handleChange}
         style={{ display: "none" }}
       />
-      <button
+      <Button
         type="button"
         disabled={loading}
+        variant="primary"
         onClick={() => inputRef.current?.click()}
         style={{
-          border: "1px solid rgba(249,115,22,0.45)",
-          background: loading
-            ? "rgba(249,115,22,0.12)"
-            : "linear-gradient(135deg,#f97316,#ef4444)",
-          color: "#fff",
-          borderRadius: 12,
-          cursor: loading ? "not-allowed" : "pointer",
-          fontWeight: 900,
           padding: "12px 18px",
         }}
       >
         {loading ? "Uploading..." : label}
-      </button>
+      </Button>
       {error && (
         <span style={{ color: "#f87171", fontSize: 12, lineHeight: 1.4 }}>
           {error}

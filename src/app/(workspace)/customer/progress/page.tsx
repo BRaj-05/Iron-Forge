@@ -1,0 +1,129 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import type { CSSProperties } from "react";
+import { Logo } from "@/components/layout/Logo";
+import { CountUp } from "@/components/motion/CountUp";
+import Card from "@/components/ui/Card";
+import { theme } from "@/lib/theme";
+import { apiRoutes } from "@/config/api-routes";
+import FormProgress from "@/modules/ai-coach/FormProgress";
+
+type ProgressData = {
+  weeklyXP: number;
+  totalXP: number;
+  avgScore: number;
+  weightTrend: number;
+  level: number;
+  streak: number;
+  weekly: Array<{ day: string; logDate: string; xp: number; score: number }>;
+  body: Array<{ week: string; weight: number; height: number }>;
+};
+
+const empty: ProgressData = { weeklyXP: 0, totalXP: 0, avgScore: 0, weightTrend: 0, level: 1, streak: 0, weekly: [], body: [] };
+
+export default function CustomerProgressPage() {
+  const [data, setData] = useState<ProgressData>(empty);
+
+  useEffect(() => {
+    fetch(apiRoutes.customer.progress, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((payload) => setData({ ...empty, ...payload }))
+      .catch(() => setData(empty));
+  }, []);
+
+  const hasProgress = (data.totalXP || data.weeklyXP) > 0 || data.body.some((item) => item.weight || item.height);
+
+  return (
+    <div style={styles.page}>
+      <FormProgress />
+      <Card style={styles.hero}>
+        <p style={styles.eyebrow}>PROGRESS LAB</p>
+        <h1 style={styles.title}>Progress from your daily check-ins.</h1>
+        <p style={styles.copy}>
+          Attendance, workout logs, diet history, and body metrics now combine
+          into XP and trend charts your trainer can review.
+        </p>
+      </Card>
+
+      <section style={styles.stats}>
+        <Stat label="Total XP" value={data.totalXP || data.weeklyXP} accent={theme.gold} />
+        <Stat label="Avg Score" value={data.avgScore} accent={theme.green} />
+        <Stat label="Weight Trend" value={data.weightTrend} suffix="kg" signed accent={theme.accent} />
+        <Stat label="Streak Days" value={data.streak} accent="#38BDF8" />
+      </section>
+
+      {hasProgress ? (
+        <section style={styles.chartGrid}>
+          <Card style={styles.panel}>
+            <p style={styles.eyebrow}>XP RHYTHM</p>
+            <h2 style={styles.sectionTitle}>This week</h2>
+            <div style={styles.chart}>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={data.weekly}>
+                  <CartesianGrid stroke="rgba(255,255,255,0.08)" />
+                  <XAxis dataKey="day" stroke={theme.textSecondary} />
+                  <YAxis stroke={theme.textSecondary} />
+                  <Tooltip contentStyle={{ background: theme.surface, border: `1px solid ${theme.border}` }} />
+                  <Area isAnimationActive type="monotone" dataKey="xp" stroke={theme.gold} fill="rgba(251,191,36,0.18)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+          <Card style={styles.panel}>
+            <p style={styles.eyebrow}>BODY TREND</p>
+            <h2 style={styles.sectionTitle}>Saved metrics</h2>
+            <div style={styles.chart}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.body}>
+                  <CartesianGrid stroke="rgba(255,255,255,0.08)" />
+                  <XAxis dataKey="week" stroke={theme.textSecondary} />
+                  <YAxis stroke={theme.textSecondary} />
+                  <Tooltip contentStyle={{ background: theme.surface, border: `1px solid ${theme.border}` }} />
+                  <Bar isAnimationActive dataKey="weight" fill="var(--accent)" radius={[8, 8, 0, 0]} />
+                  <Bar isAnimationActive dataKey="height" fill="var(--green)" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </section>
+      ) : (
+        <Card style={styles.emptyState}>
+          <div style={styles.emptyIcon}><Logo size={48} /></div>
+          <h2>Log your first workout to see progress here.</h2>
+          <p>Attendance, workouts, diet, and body metrics will turn into XP charts once you save your first daily log.</p>
+          <Link href="/customer/workouts" style={styles.emptyCta}>Open workouts</Link>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function Stat({ label, value, accent, suffix = "", signed = false }: { label: string; value: number; accent: string; suffix?: string; signed?: boolean }) {
+  const prefix = signed && value > 0 ? "+" : "";
+  return (
+    <Card accent={accent} style={{ ...styles.stat, borderTopColor: accent }}>
+      <span>{label}</span>
+      <strong>{prefix}<CountUp value={value} suffix={suffix} /></strong>
+    </Card>
+  );
+}
+
+const styles: Record<string, CSSProperties> = {
+  page: { padding: 32 },
+  hero: { padding: 30, marginBottom: 22, background: "linear-gradient(135deg,#111118,#071016)" },
+  eyebrow: { color: theme.accent, fontSize: 10, letterSpacing: 4, fontWeight: 950 },
+  title: { fontSize: "clamp(34px, 5vw, 64px)", lineHeight: 1, maxWidth: 920, margin: "12px 0" },
+  copy: { color: theme.textSecondary, lineHeight: 1.75, maxWidth: 820 },
+  stats: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 18 },
+  stat: { borderTop: "4px solid", padding: 20, display: "grid", gap: 8 },
+  chartGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 18 },
+  panel: { padding: 24 },
+  sectionTitle: { fontSize: 34, margin: "8px 0 18px" },
+  chart: { height: 320 },
+  emptyState: { padding: 32, display: "grid", justifyItems: "start", gap: 12, color: theme.textSecondary },
+  emptyIcon: { width: 56, height: 56, borderRadius: 12, display: "grid", placeItems: "center", background: theme.gradient, color: "#fff", fontWeight: 950 },
+  emptyCta: { minHeight: 46, display: "inline-flex", alignItems: "center", borderRadius: 10, background: theme.gradient, color: "#fff", padding: "0 16px", textDecoration: "none", fontWeight: 950 },
+};

@@ -9,8 +9,11 @@ const eslintConfig = defineConfig([
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-require-imports": "off",
-      "react-hooks/set-state-in-effect": "warn",
     },
+  },
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    rules: { "react-hooks/set-state-in-effect": "warn" },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

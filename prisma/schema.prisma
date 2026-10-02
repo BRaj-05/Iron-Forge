@@ -35,6 +35,18 @@ enum SupportRequestStatus {
   REJECTED
 }
 
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+}
+
 model User {
   id                  String    @id @default(auto()) @map("_id") @db.ObjectId
   name                String
@@ -49,6 +61,8 @@ model User {
   heightCm            Float?
   weightKg            Float?
   emergencyContact    String?
+  resetTokenHash      String?
+  resetTokenExpiresAt DateTime?
   isActive            Boolean   @default(true)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -60,12 +74,12 @@ model User {
 }
 
 model MembershipPlan {
-  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   durationDays Int
   price        Float
   features     String[]
-  isActive     Boolean @default(true)
+  isActive     Boolean  @default(true)
 }
 
 model Subscription {
@@ -150,6 +164,33 @@ model Notification {
   createdAt DateTime @default(now())
 }
 
+model CustomerTask {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  customerId  String       @db.ObjectId
+  title       String
+  description String?
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus   @default(PENDING)
+  completed   Boolean      @default(false)
+  xpEarned    Int          @default(0)
+  deadline    DateTime?
+  important   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([customerId, createdAt])
+}
+
+model CustomerProgress {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  customerId        String    @unique @db.ObjectId
+  xp                Int       @default(0)
+  level             Int       @default(1)
+  streak            Int       @default(0)
+  lastCompletedDate DateTime?
+  updatedAt         DateTime  @updatedAt
+}
+
 model SupportRequest {
   id                String               @id @default(auto()) @map("_id") @db.ObjectId
   requesterId       String               @db.ObjectId
@@ -161,4 +202,26 @@ model SupportRequest {
   status            SupportRequestStatus @default(OPEN)
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
+}
+
+model AIWorkoutSession {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId      String   @db.ObjectId
+  clientSessionId String
+  exercise        String
+  targetSets      Int
+  targetReps      Int
+  completedSets   Int
+  completedReps   Int
+  goodReps        Int
+  formIssueCount  Int
+  formScore       Float
+  durationSeconds Int
+  issues          Json
+  startedAt       DateTime
+  endedAt         DateTime
+  createdAt       DateTime @default(now())
+
+  @@unique([customerId, clientSessionId])
+  @@index([customerId, createdAt])
 }
