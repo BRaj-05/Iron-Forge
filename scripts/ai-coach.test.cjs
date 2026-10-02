@@ -94,7 +94,7 @@ test("low confidence and brief threshold crossings never count", () => {
   assert.equal(result.status, "NO_POSE");
 });
 
-test("push-up tolerates one missing frame and counts only after returning to top", () => {
+test("push-up accepts beginner depth, tolerates brief pose loss, and counts on return to top", () => {
   const engine = new WorkoutEngine("PUSH_UP");
   let time = 0, result;
   const hold = (angle, frames = 8, confidence = 0.99) => {
@@ -103,17 +103,33 @@ test("push-up tolerates one missing frame and counts only after returning to top
       result = engine.update(points, (time += 100));
     }
   };
-  hold(170);
-  hold(125, 4);
-  hold(85);
+  hold(158);
+  hold(138, 4);
+  hold(118);
   assert.equal(result.reps, 0, "bottom alone is not a repetition");
   result = engine.update([], (time += 100));
   assert.equal(result.status, "PARTIAL_POSE");
-  hold(125, 4, 0.55);
-  hold(170, 8, 0.55);
+  hold(138, 4, 0.55);
+  hold(158, 8, 0.55);
   assert.equal(result.reps, 1);
-  hold(151, 5); hold(154, 5); hold(151, 5); hold(154, 5);
+  hold(147, 5); hold(149, 5); hold(147, 5); hold(149, 5);
   assert.equal(result.reps, 1, "threshold noise cannot double count");
+});
+
+
+test("beginner push-up with moderate depth counts", () => {
+  const engine = new WorkoutEngine("PUSH_UP");
+  let time = 0, result;
+  const hold = (angle, frames = 8) => {
+    for (let i = 0; i < frames; i++)
+      result = engine.update(pose("PUSH_UP", angle), (time += 100));
+  };
+  hold(156);
+  hold(136, 4);
+  hold(120);
+  hold(136, 4);
+  hold(156);
+  assert.equal(result.reps, 1);
 });
 
 test("standing elbow curl cannot count as a push-up", () => {
