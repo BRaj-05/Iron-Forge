@@ -136,7 +136,7 @@ export default function CameraStage({
                   snapshot.status === "WARNING" ? "#fb923c" : "#34d399";
                 context.lineWidth = 3;
                 for (const [a, b] of connections) {
-                  if (!visible(points[a]) || !visible(points[b])) continue;
+                  if (!visible(points[a], 0.5) || !visible(points[b], 0.5)) continue;
                   context.beginPath();
                   context.moveTo(
                     points[a].x * surface.width,
@@ -150,7 +150,7 @@ export default function CameraStage({
                 }
                 context.fillStyle = "#fff";
                 points.forEach((point, index) => {
-                  if (index < 11 || !visible(point)) return;
+                  if (index < 11 || !visible(point, 0.5)) return;
                   context.beginPath();
                   context.arc(
                     point.x * surface.width,

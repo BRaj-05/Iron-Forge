@@ -156,7 +156,7 @@ export function analyzePose(
     const lean = torsoLean(shoulder, hip, aspect);
     if (lean > 58) issue("CHEST_LEAN", "Lift your chest slightly.");
     if (angle > config.low && angle < 140)
-      issue("SQUAT_DEPTH", "Go a little deeper if comfortable.");
+      issue("SHALLOW_RANGE", "Go a little deeper if comfortable.");
   }
 
   if (id === "LUNGE") {
@@ -200,7 +200,7 @@ export function analyzePose(
       issue("HIP_ALIGNMENT", "Keep your hips closer to your shoulder line.");
 
     if (angle > config.low && angle < 142)
-      issue("RANGE", "Lower a little more if comfortable.");
+      issue("SHALLOW_RANGE", "Lower a little more if comfortable.");
   }
 
   const press = id === "SHOULDER_PRESS";
