@@ -35,15 +35,15 @@ export const experienceSlides = [
 
 export const trustedVideoGuides = [
   {
-    title: "Common Yoga Protocol 2026",
+    title: "Common Yoga Protocol",
     publisher: "Morarji Desai National Institute of Yoga",
-    videoId: "Td5L4gxhiQU",
+    videoId: "8ch8_AX-7ZU",
     note: "Official structured yoga routine from MDNIY, Ministry of Ayush.",
   },
   {
-    title: "Yoga Protocol Series",
-    publisher: "Ministry of Ayush",
-    videoId: "kpdfHJ7x0dY",
+    title: "5 Minutes Yoga Protocol",
+    publisher: "MyGov India / Ministry of Ayush",
+    videoId: "KTvIGZSD_9s",
     note: "Official Ministry of Ayush guidance and protocol material.",
   },
   {
