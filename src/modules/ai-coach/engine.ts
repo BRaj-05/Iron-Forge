@@ -38,7 +38,7 @@ export class WorkoutEngine {
   }
 
   update(points: Point[], time: number, aspect = 1): Snapshot {
-    if (time - this.lastTime > 700) this.resetTracking();
+    if (this.lastTime && time - this.lastTime > 1200) this.resetTracking();
     this.lastTime = time;
     const analysis = analyzePose(this.exercise, points, aspect, this.side);
     let message = "Get into your starting position.";
@@ -46,14 +46,14 @@ export class WorkoutEngine {
     if (!analysis) {
       this.missingSince ??= time;
       const missingFor = time - this.missingSince;
-      if (missingFor > 650) {
+      if (missingFor > 900) {
         this.resetTracking();
-        this.missingSince = time - 651;
+        this.missingSince = time - 901;
         status = "NO_POSE";
         message = "Step into frame and keep your working side visible.";
       } else {
         status = "PARTIAL_POSE";
-        message = "Tracking… move back slightly so your arm and legs stay visible.";
+        message = "Partial pose — keep your working arm and torso visible.";
       }
     } else {
       this.missingSince = null;
@@ -83,8 +83,8 @@ export class WorkoutEngine {
       }
       const config = exerciseConfig[this.exercise];
       const press = this.exercise === "SHOULDER_PRESS";
-      const start = press ? this.smoothedAngle < config.low : this.smoothedAngle > config.high;
-      const peak = press ? this.smoothedAngle > config.high && analysis.peakGate : this.smoothedAngle < config.low;
+      const start = press ? this.smoothedAngle <= config.low : this.smoothedAngle >= config.high;
+      const peak = press ? this.smoothedAngle >= config.high && analysis.peakGate : this.smoothedAngle <= config.low;
       const next = start ? "START" : peak ? "PEAK" : "MIDDLE";
       if (next !== this.candidate) {
         this.candidate = next;
