@@ -166,11 +166,11 @@ export default function PostureCoach() {
     );
 
   return (
-    <section>
+    <section className={styles.postureCoach}>
       {!active ? (
         <>
-          <h2>Choose your exercise</h2>
-          <div className={styles.row}>
+          <div className={styles.setup}><p className={styles.kicker}>START A SESSION</p><h2>Choose your exercise</h2>
+          <div className={styles.exerciseSelector}>
             {exerciseIds.map((id) => (
               <button
                 key={id}
@@ -222,7 +222,7 @@ export default function PostureCoach() {
             Camera analysis runs in your browser. Iron Forge saves workout
             metrics, not your workout video.
           </p>
-          <button onClick={start}>Enable camera & start AI coach</button>
+          <button className={styles.startButton} onClick={start}>Enable camera & start AI coach</button></div>
         </>
       ) : (
         <>

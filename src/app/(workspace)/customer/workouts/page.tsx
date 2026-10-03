@@ -15,7 +15,7 @@ export default function CustomerWorkoutsPage() {
   const cardio = cardioWorkouts.slice(0, 3);
 
   return (
-    <div style={styles.page}>
+    <div className="immersive-page training-immersive" style={styles.page}>
       <section style={styles.hero}>
         <div>
           <p style={styles.eyebrow}>WORKOUT COMMAND</p>
@@ -112,7 +112,7 @@ export default function CustomerWorkoutsPage() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  page: { padding: "clamp(24px,4vw,52px)", color: theme.textPrimary, background: "#0d0e12" },
+  page: { minHeight: "100vh", padding: "clamp(24px,4vw,52px)", color: theme.textPrimary, background: "#0d0e12" },
   hero: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1fr) 320px",

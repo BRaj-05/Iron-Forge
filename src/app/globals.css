@@ -1461,6 +1461,39 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   margin: 0 auto;
   min-height: calc(100vh - 150px);
 }
+.unified-account-shell:has(.immersive-page),
+.unified-account-content:has(.immersive-page) { max-width: none; background: #0b0d11; }
+
+/* Immersive training library */
+.training-library { display: grid; gap: 64px; }
+.training-category-tabs { position: sticky; top: 78px; z-index: 12; width: fit-content; padding: 6px; display: flex; gap: 4px; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; background: rgba(13,14,19,.82); backdrop-filter: blur(16px); }
+.training-category-tabs a { padding: 10px 16px; border-radius: 999px; color: #a9afb9; text-decoration: none; font-size: 11px; font-weight: 800; }
+.training-category-tabs a:hover { color: #fff; background: rgba(249,115,22,.16); }
+.training-library-section { scroll-margin-top: 160px; }
+.training-library-section > header { margin-bottom: 20px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+.training-library-section h2 { font-size: clamp(34px,4vw,58px); letter-spacing: -.04em; }
+.training-library-section header p:last-child { max-width: 650px; color: #8f96a3; line-height: 1.65; }
+.training-library-section header > span { color: #fb923c; font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.training-card-row { display: flex; gap: 16px; overflow-x: auto; padding: 2px 2px 18px; scroll-snap-type: x mandatory; scrollbar-color: #f97316 #171921; }
+.training-muscle-card { flex: 0 0 clamp(280px,29vw,390px); overflow: hidden; scroll-snap-align: start; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; color: #fff; background: #14161d; text-decoration: none; box-shadow: 0 22px 55px rgba(0,0,0,.22); transition: transform .25s ease,border-color .25s ease,box-shadow .25s ease; }
+.training-muscle-card:hover { transform: translateY(-6px); border-color: rgba(249,115,22,.5); box-shadow: 0 28px 70px rgba(0,0,0,.36); }
+.training-card-image { position: relative; height: 210px; overflow: hidden; }
+.training-card-image::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 45%,#14161d); }
+.training-card-image img { object-fit: cover; transition: transform .5s ease; }
+.training-muscle-card:hover img { transform: scale(1.045); }
+.training-card-content { padding: 0 20px 21px; }
+.training-card-content small { color: #fb923c; font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.training-card-content h3 { margin: 8px 0; font-size: 28px; }
+.training-card-content p { min-height: 48px; color: #a5abb5; line-height: 1.55; }
+.training-card-content > div { margin-top: 17px; padding-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+.training-card-content span { color: #7f8794; font-size: 10px; }
+.training-card-content b { display: inline-flex; align-items: center; gap: 6px; color: #fff; font-size: 11px; }
+@media (max-width: 700px) {
+  .training-library { gap: 44px; }
+  .training-category-tabs { width: 100%; overflow-x: auto; }
+  .training-library-section > header { align-items: flex-start; flex-direction: column; }
+  .training-muscle-card { flex-basis: 84vw; }
+}
 .workspace-header-actions {
   display: flex;
   align-items: center;

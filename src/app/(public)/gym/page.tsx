@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import FadeInSection from "@/components/motion/FadeInSection";
+import TrainingLibrarySections from "@/components/training/TrainingLibrarySections";
 import PublicPageShell from "@/components/home/PublicPageShell";
-import { exerciseImageForExercise, exerciseImageForSlot, exercisePath, exercises, muscleGroups } from "@/lib/exercise-data";
+import { exerciseImageForExercise, exerciseImageForSlot, exercisePath, exercises } from "@/lib/exercise-data";
 
 export default async function GymLibraryPage({
   searchParams,
@@ -87,64 +88,9 @@ export default async function GymLibraryPage({
             </div>
           </div>
         )}
-        <div className="if-grid">
-          {muscleGroups.map((group) => {
-            const count = exercises.filter(
-              (exercise) => exercise.muscleSlug === group.slug,
-            ).length;
-
-            return (
-              <Link
-                key={group.slug}
-                href={`/gym/${group.slug}`}
-                className="if-card"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <div
-                  style={{
-                    position: "relative",
-                    minHeight: 160,
-                    borderRadius: 10,
-                    marginBottom: 16,
-                    overflow: "hidden",
-                  }}
-                >
-                  <Image
-                    src={exerciseImageForSlot(group.imageSlot)}
-                    alt={`${group.name} training`}
-                    fill
-                    sizes="(max-width: 800px) 100vw, 33vw"
-                    unoptimized
-                    style={{ objectFit: "cover" }}
-                  />
-                  <div style={styles.imageOverlay} />
-                </div>
-                <span className="if-tag">{count} exercises</span>
-                <h2>{group.name}</h2>
-                <p>{group.focus}</p>
-                <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
-                  <Info label="Targets" value={group.targetMuscles.join(", ")} />
-                  <Info label="Examples" value={group.exampleExercises.join(", ")} />
-                  <Info label="Equipment" value={group.equipmentNeeded.slice(0, 3).join(", ")} />
-                  <Info label="Difficulty" value={group.difficulty} />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <TrainingLibrarySections />
       </FadeInSection>
     </PublicPageShell>
-  );
-}
-
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <strong style={{ display: "block", color: "#FBBF24", fontSize: 12 }}>
-        {label}
-      </strong>
-      <span className="if-muted">{value}</span>
-    </div>
   );
 }
 
