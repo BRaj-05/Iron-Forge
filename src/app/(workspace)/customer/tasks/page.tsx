@@ -1,17 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Check, Circle, Plus, Sparkles, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, Circle, Plus, Sparkles, Target, Trash2, Trophy } from "lucide-react";
 import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
-import PageHeading from "@/components/ui/PageHeading";
 import { Input, Select } from "@/components/ui/FormField";
 import { apiRoutes } from "@/config/api-routes";
 import { apiRequest, jsonRequest } from "@/modules/customer/api";
+import { experienceSlides } from "@/lib/experience-media";
 
 type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 type Task = { id: string; title: string; description?: string; completed: boolean; priority: Priority; xpEarned?: number };
+
+const priorityMeta: Record<Priority, { label: string; xp: number; tone: string }> = {
+  LOW: { label: "Low", xp: 5, tone: "low" },
+  MEDIUM: { label: "Medium", xp: 10, tone: "medium" },
+  HIGH: { label: "High", xp: 20, tone: "high" },
+  CRITICAL: { label: "Critical", xp: 40, tone: "critical" },
+};
 
 export default function CustomerTasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -20,45 +26,178 @@ export default function CustomerTasksPage() {
   const [priority, setPriority] = useState<Priority>("MEDIUM");
 
   const loadTasks = useCallback(async () => {
-    try { setTasks(await apiRequest<Task[]>(apiRoutes.customer.tasks)); }
-    catch (reason) { toast.error(reason instanceof Error ? reason.message : "Could not load tasks."); }
-    finally { setLoading(false); }
+    try {
+      setTasks(await apiRequest<Task[]>(apiRoutes.customer.tasks));
+    } catch (reason) {
+      toast.error(reason instanceof Error ? reason.message : "Could not load tasks.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
   useEffect(() => { void loadTasks(); }, [loadTasks]);
 
   async function createTask() {
     if (!title.trim()) return;
     try {
       await jsonRequest(apiRoutes.customer.tasks, "POST", { title, priority });
-      setTitle(""); toast.success("Task added."); await loadTasks();
-    } catch (reason) { toast.error(reason instanceof Error ? reason.message : "Could not add task."); }
+      setTitle("");
+      toast.success("Task added.");
+      await loadTasks();
+    } catch (reason) {
+      toast.error(reason instanceof Error ? reason.message : "Could not add task.");
+    }
   }
+
   async function completeTask(task: Task) {
-    try { await jsonRequest(apiRoutes.customer.tasks, "PATCH", { id: task.id, completed: true }); await loadTasks(); }
-    catch (reason) { toast.error(reason instanceof Error ? reason.message : "Could not update task."); }
+    try {
+      await jsonRequest(apiRoutes.customer.tasks, "PATCH", { id: task.id, completed: true });
+      await loadTasks();
+    } catch (reason) {
+      toast.error(reason instanceof Error ? reason.message : "Could not update task.");
+    }
   }
+
   async function removeTask(task: Task) {
-    try { await apiRequest(apiRoutes.customer.tasks, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: task.id }) }); await loadTasks(); }
-    catch (reason) { toast.error(reason instanceof Error ? reason.message : "Could not delete task."); }
+    try {
+      await apiRequest(apiRoutes.customer.tasks, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: task.id }),
+      });
+      await loadTasks();
+    } catch (reason) {
+      toast.error(reason instanceof Error ? reason.message : "Could not delete task.");
+    }
   }
 
   const completed = tasks.filter((task) => task.completed).length;
-  return <div className="dashboard-page compact-page">
-    <PageHeading eyebrow="My gym" title="Daily tasks" description="Keep small commitments visible and earn XP when you finish them." />
-    <section className="dashboard-main-grid">
-      <Card className="dashboard-panel">
-        <div className="dashboard-panel-heading"><div><h2>Add a task</h2><p>Choose one action you can finish today.</p></div><span className="panel-icon"><Plus size={18} /></span></div>
-        <div className="daily-form-stack"><Input label="Task title" placeholder="Example: 20 minute incline walk" value={title} onChange={(event) => setTitle(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void createTask(); }} /><Select label="Priority" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}><option value="LOW">Low · 5 XP</option><option value="MEDIUM">Medium · 10 XP</option><option value="HIGH">High · 20 XP</option><option value="CRITICAL">Critical · 40 XP</option></Select><Button onClick={() => void createTask()} disabled={!title.trim()}>Add task</Button></div>
-      </Card>
-      <Card className="dashboard-panel">
-        <div className="dashboard-panel-heading"><div><h2>Today’s progress</h2><p>{completed} of {tasks.length} tasks complete.</p></div><span className="panel-icon"><Sparkles size={18} /></span></div>
-        <div className="dashboard-progress-track"><span style={{ width: tasks.length ? `${completed / tasks.length * 100}%` : "0%" }} /></div>
-        <strong className="task-progress-number">{completed}/{tasks.length}</strong>
-      </Card>
-    </section>
-    <Card className="dashboard-panel">
-      <div className="dashboard-panel-heading"><div><h2>Your tasks</h2><p>Complete tasks when you actually finish the work.</p></div></div>
-      <div className="task-list">{loading ? <div className="skeleton dashboard-card-skeleton" /> : tasks.length ? tasks.map((task) => <div className={`task-item ${task.completed ? "is-complete" : ""}`} key={task.id}><button className="task-check" onClick={() => !task.completed && void completeTask(task)} aria-label={`Complete ${task.title}`}>{task.completed ? <Check size={17} /> : <Circle size={17} />}</button><div><strong>{task.title}</strong><small>{task.priority} priority {task.xpEarned ? `· +${task.xpEarned} XP earned` : ""}</small></div><button className="task-delete" onClick={() => void removeTask(task)} aria-label={`Delete ${task.title}`}><Trash2 size={16} /></button></div>) : <div className="dashboard-empty"><Sparkles size={22} /><p>No tasks yet. Add one small goal above.</p></div>}</div>
-    </Card>
-  </div>;
+  const earnedXp = useMemo(
+    () => tasks.reduce((sum, task) => sum + (task.completed ? task.xpEarned || priorityMeta[task.priority].xp : 0), 0),
+    [tasks],
+  );
+  const progress = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
+
+  return (
+    <div className="task-command-page">
+      <section
+        className="task-command-hero"
+        style={{
+          backgroundImage:
+            "linear-gradient(90deg, rgba(8,9,12,.95), rgba(8,9,12,.72) 62%, rgba(8,9,12,.34)), url(" +
+            experienceSlides[3].image +
+            ")",
+        }}
+      >
+        <div>
+          <p className="if-kicker">Daily commitments</p>
+          <h1>Turn small wins into momentum.</h1>
+          <p>Keep today focused. Pick a few actions, finish them, and let XP reflect the work.</p>
+        </div>
+        <div className="task-command-score">
+          <span>Today</span>
+          <strong>{progress}%</strong>
+          <small>{completed} of {tasks.length} complete</small>
+          <div className="task-command-progress"><span style={{ width: progress + "%" }} /></div>
+        </div>
+      </section>
+
+      <section className="task-command-grid">
+        <article className="task-create-card">
+          <div className="task-card-heading">
+            <span><Plus size={18} /></span>
+            <div>
+              <p className="if-kicker">Add focus</p>
+              <h2>What will you finish?</h2>
+            </div>
+          </div>
+
+          <div className="task-form-modern">
+            <Input
+              label="Task title"
+              placeholder="Example: 20 minute incline walk"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              onKeyDown={(event) => { if (event.key === "Enter") void createTask(); }}
+            />
+            <Select
+              label="Priority"
+              value={priority}
+              onChange={(event) => setPriority(event.target.value as Priority)}
+            >
+              <option value="LOW">Low · 5 XP</option>
+              <option value="MEDIUM">Medium · 10 XP</option>
+              <option value="HIGH">High · 20 XP</option>
+              <option value="CRITICAL">Critical · 40 XP</option>
+            </Select>
+            <Button onClick={() => void createTask()} disabled={!title.trim()}>
+              Add task
+            </Button>
+          </div>
+        </article>
+
+        <article className="task-insight-card">
+          <div className="task-insight-icon"><Trophy size={22} /></div>
+          <span>XP earned today</span>
+          <strong>{earnedXp}</strong>
+          <p>{tasks.length ? "Complete what matters before adding more." : "Your first task can be small."}</p>
+          <div className="task-insight-mini">
+            <Target size={16} />
+            <span>{tasks.length - completed} still open</span>
+          </div>
+        </article>
+      </section>
+
+      <section className="task-board">
+        <div className="task-board-head">
+          <div>
+            <p className="if-kicker">Today&apos;s board</p>
+            <h2>Your commitments</h2>
+          </div>
+          <span>{tasks.length} tasks</span>
+        </div>
+
+        <div className="task-modern-list">
+          {loading ? (
+            <div className="task-loading-card" />
+          ) : tasks.length ? (
+            tasks.map((task) => {
+              const meta = priorityMeta[task.priority];
+              return (
+                <article className={"task-modern-item " + (task.completed ? "is-complete" : "")} key={task.id}>
+                  <button
+                    className="task-modern-check"
+                    onClick={() => !task.completed && void completeTask(task)}
+                    aria-label={"Complete " + task.title}
+                  >
+                    {task.completed ? <Check size={18} /> : <Circle size={18} />}
+                  </button>
+                  <div className="task-modern-copy">
+                    <div>
+                      <strong>{task.title}</strong>
+                      <span className={"task-priority tone-" + meta.tone}>{meta.label}</span>
+                    </div>
+                    <small>{task.completed ? "+" + (task.xpEarned || meta.xp) + " XP earned" : meta.xp + " XP available"}</small>
+                  </div>
+                  <button
+                    className="task-modern-delete"
+                    onClick={() => void removeTask(task)}
+                    aria-label={"Delete " + task.title}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </article>
+              );
+            })
+          ) : (
+            <div className="task-empty-modern">
+              <Sparkles size={26} />
+              <h3>Nothing on the board yet.</h3>
+              <p>Add one useful action above and keep the day intentionally small.</p>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
 }
