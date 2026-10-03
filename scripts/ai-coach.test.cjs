@@ -74,10 +74,6 @@ for (const exercise of [
     hold(peak);
     hold(start);
     assert.equal(snapshot.reps, 2);
-    hold(peak);
-    engine.update([], (time += 100));
-    hold(start);
-    assert.equal(snapshot.reps, 2, "lost pose cancels an incomplete rep");
   });
 }
 
@@ -89,7 +85,97 @@ test("low confidence and brief threshold crossings never count", () => {
   assert.equal(result.reps, 0);
   const hidden = pose("SQUAT", 175).map((p) => ({ ...p, visibility: 0.2 }));
   result = engine.update(hidden, 5100);
+  assert.equal(result.status, "PARTIAL_POSE");
+  result = engine.update(hidden, 6101);
   assert.equal(result.status, "NO_POSE");
+});
+
+test("push-up accepts beginner depth, tolerates brief pose loss, and counts on return to top", () => {
+  const engine = new WorkoutEngine("PUSH_UP");
+  let time = 0, result;
+  const hold = (angle, frames = 8, confidence = 0.99) => {
+    for (let i = 0; i < frames; i++) {
+      const points = pose("PUSH_UP", angle).map((point) => point.visibility ? { ...point, visibility: confidence } : point);
+      result = engine.update(points, (time += 100));
+    }
+  };
+  hold(158);
+  hold(138, 4);
+  hold(118);
+  assert.equal(result.reps, 0, "bottom alone is not a repetition");
+  result = engine.update([], (time += 100));
+  assert.equal(result.status, "PARTIAL_POSE");
+  hold(138, 4, 0.55);
+  hold(158, 8, 0.55);
+  assert.equal(result.reps, 1);
+  hold(147, 5); hold(149, 5); hold(147, 5); hold(149, 5);
+  assert.equal(result.reps, 1, "threshold noise cannot double count");
+});
+
+
+test("beginner push-up with moderate depth counts", () => {
+  const engine = new WorkoutEngine("PUSH_UP");
+  let time = 0, result;
+  const hold = (angle, frames = 8) => {
+    for (let i = 0; i < frames; i++)
+      result = engine.update(pose("PUSH_UP", angle), (time += 100));
+  };
+  hold(156);
+  hold(136, 4);
+  hold(120);
+  hold(136, 4);
+  hold(156);
+  assert.equal(result.reps, 1);
+});
+
+test("knee push-up counts when ankle landmarks are unavailable", () => {
+  const engine = new WorkoutEngine("PUSH_UP");
+  let time = 0, result;
+  const hold = (angle) => {
+    for (let i = 0; i < 8; i++) {
+      const points = pose("PUSH_UP", angle);
+      for (const offset of [0, 1]) {
+        points[27 + offset].visibility = 0.1;
+        points[25 + offset] = { x: 0.72 + offset * 0.01, y: 0.42, visibility: 0.9 };
+      }
+      result = engine.update(points, (time += 100));
+    }
+  };
+  hold(158); hold(118); hold(158);
+  assert.equal(result.reps, 1);
+});
+
+test("shallow push-up and bottom without return do not count", () => {
+  const shallow = new WorkoutEngine("PUSH_UP");
+  const bottomOnly = new WorkoutEngine("PUSH_UP");
+  let time = 0, shallowResult, bottomResult;
+  for (const angle of [158, 138, 125, 138, 158]) {
+    for (let i = 0; i < 6; i++) shallowResult = shallow.update(pose("PUSH_UP", angle), (time += 100));
+  }
+  assert.equal(shallowResult.reps, 0);
+  time = 0;
+  for (const angle of [158, 138, 118]) {
+    for (let i = 0; i < 7; i++) bottomResult = bottomOnly.update(pose("PUSH_UP", angle), (time += 100));
+  }
+  assert.equal(bottomResult.reps, 0);
+});
+
+test("standing elbow curl cannot count as a push-up", () => {
+  const engine = new WorkoutEngine("PUSH_UP");
+  let result, time = 0;
+  for (const angle of [170, 170, 90, 90, 170, 170]) {
+    for (let i = 0; i < 5; i++) {
+      const points = pose("PUSH_UP", angle);
+      for (const offset of [0, 1]) {
+        points[11 + offset] = { x: .4, y: .2, visibility: .99 };
+        points[23 + offset] = { x: .4, y: .5, visibility: .99 };
+        points[25 + offset] = { x: .4, y: .7, visibility: .99 };
+        points[27 + offset] = { x: .4, y: .9, visibility: .99 };
+      }
+      result = engine.update(points, (time += 100));
+    }
+  }
+  assert.equal(result.reps, 0);
 });
 
 test("sustained form warnings lower the score and aggregate once per attempt", () => {

@@ -35,6 +35,13 @@ async function main() {
     const page = await context.newPage();
     const failures = [];
     page.on("pageerror", (error) => failures.push(error.message));
+    await page.goto("/customer");
+    await expect(page.getByRole("link", { name: "Home", exact: true })).toBeVisible();
+    await expect(page.getByText(/MEMBER SPACE|CUSTOMER SPACE|TRAINER SPACE|OWNER SPACE/)).toHaveCount(0);
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    await expect(page.getByRole("menu")).toBeVisible();
+    await page.locator("#workspace-content").click({ position: { x: 10, y: 10 } });
+    await expect(page.getByRole("menu")).toBeHidden();
     await page.goto("/customer/ai-coach");
     await expect(
       page.getByRole("heading", { name: "Choose your exercise" }),
@@ -73,7 +80,7 @@ async function main() {
       timeout: 120000,
     });
     await expect(
-      page.getByText("No pose detected", { exact: false }),
+      page.getByText("Step into frame", { exact: false }),
     ).toBeVisible({ timeout: 30000 });
     const track = await page
       .locator("video")

@@ -1,19 +1,27 @@
 import type { Point } from "./types";
 
-export function visible(point?: Point): point is Point {
+/**
+ * MediaPipe visibility fluctuates during fast movement. 0.55 is deliberately
+ * tolerant enough for workout tracking while still rejecting weak landmarks.
+ */
+export function visible(point?: Point, minVisibility = 0.55): point is Point {
   return (
     !!point &&
     Number.isFinite(point.x) &&
     Number.isFinite(point.y) &&
-    (point.visibility ?? 0) >= 0.7 &&
-    point.x >= 0 &&
-    point.x <= 1 &&
-    point.y >= 0 &&
-    point.y <= 1
+    (point.visibility ?? 0) >= minVisibility &&
+    point.x >= -0.05 &&
+    point.x <= 1.05 &&
+    point.y >= -0.05 &&
+    point.y <= 1.05
   );
 }
 
-/** Pixel aspect correction matters: normalized x/y use different units. */
+export function strongVisible(point?: Point): point is Point {
+  return visible(point, 0.7);
+}
+
+/** Pixel aspect correction matters because normalized x/y use different units. */
 export function calculateAngle(
   a: Point,
   b: Point,
@@ -24,6 +32,7 @@ export function calculateAngle(
   const v = [(c.x - b.x) * aspect, c.y - b.y];
   const denominator = Math.hypot(...u) * Math.hypot(...v);
   if (!Number.isFinite(denominator) || denominator < 1e-8) return null;
+
   return (
     (Math.acos(
       Math.max(-1, Math.min(1, (u[0] * v[0] + u[1] * v[1]) / denominator)),
@@ -42,4 +51,10 @@ export function torsoLean(shoulder: Point, hip: Point, aspect: number) {
       180) /
     Math.PI
   );
+}
+
+export function horizontalBodyRatio(a: Point, b: Point, aspect: number) {
+  const horizontal = Math.abs(a.x - b.x) * aspect;
+  const vertical = Math.abs(a.y - b.y);
+  return horizontal / Math.max(vertical, 0.03);
 }

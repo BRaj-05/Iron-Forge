@@ -12,6 +12,7 @@ import { apiRequest } from "@/modules/customer/api";
 import { useCustomerDashboard } from "@/modules/customer/useCustomerDashboard";
 import type { ExerciseEntry, MealEntry } from "@/modules/customer/types";
 import { apiRoutes } from "@/config/api-routes";
+import { experienceSlides } from "@/lib/experience-media";
 
 export default function CustomerDashboard() {
   const { data, loading, error, refresh } = useCustomerDashboard();
@@ -30,7 +31,22 @@ export default function CustomerDashboard() {
   const membershipTone = data.subscription?.status === "ACTIVE" ? "var(--green)" : "var(--gold)";
 
   return <div className="dashboard-page">
-    <PageHeading eyebrow={new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date())} title={`Welcome back, ${firstName}.`} description="Here’s your training picture for today. One clear next step at a time." action={<Link className="dashboard-primary-link" href="/customer/daily-log">Update today’s log <ArrowRight size={17} /></Link>} />
+    <section className="dashboard-welcome-grid">
+      <div className="dashboard-welcome-copy">
+        <PageHeading eyebrow={new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date())} title={`Welcome back, ${firstName}.`} description="Here’s your training picture for today. One clear next step at a time." action={<Link className="dashboard-primary-link" href="/customer/daily-log">Update today’s log <ArrowRight size={17} /></Link>} />
+      </div>
+      <Link
+        href="/customer/workouts"
+        className="dashboard-welcome-visual"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(15,14,13,.05), rgba(15,14,13,.78)), url(${experienceSlides[0].image})`,
+        }}
+      >
+        <span>Today&apos;s focus</span>
+        <strong>Train with purpose.</strong>
+        <small>Open your workout plan <ArrowRight size={14} /></small>
+      </Link>
+    </section>
     {error && <div className="dashboard-inline-error">{error}</div>}
     {(data.subscription?.status === "EXPIRING_SOON" || data.subscription?.status === "EXPIRED") && <Card className="dashboard-membership-alert"><div><strong>{data.subscription.status === "EXPIRED" ? "Your membership has expired" : `${data.subscription.daysRemaining ?? 0} days left on your membership`}</strong><p>Renew to keep your training and trainer access uninterrupted.</p></div><Link href="/plans">View plans <ArrowRight size={16} /></Link></Card>}
 

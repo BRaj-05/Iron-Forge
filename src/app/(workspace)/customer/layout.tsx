@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import WorkspaceShell from "@/components/layout/WorkspaceShell";
+import AccountShell from "@/components/layout/AccountShell";
 
 export default function CustomerLayout({ children }: { children: ReactNode }) {
-  return <WorkspaceShell role="CUSTOMER">{children}</WorkspaceShell>;
+  return <AccountShell role="CUSTOMER">{children}</AccountShell>;
 }

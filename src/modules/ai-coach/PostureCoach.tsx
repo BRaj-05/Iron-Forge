@@ -22,9 +22,12 @@ const initial: Snapshot = {
   angle: null,
   status: "NO_POSE",
   message: "Position yourself in frame.",
+  side: null,
+  bodyAngle: null,
 };
 
 export default function PostureCoach() {
+  const showPoseDebug = process.env.NODE_ENV !== "production";
   const [exercise, setExercise] = useState<ExerciseId>("SQUAT");
   const [targetReps, setTargetReps] = useState(10),
     [targetSets, setTargetSets] = useState(3);
@@ -126,28 +129,22 @@ export default function PostureCoach() {
 
   if (summary)
     return (
-      <section>
-        <h2>Workout complete — {exerciseConfig[exercise].name}</h2>
-        <div className={styles.metrics}>
-          <div>
-            <strong>
-              {summary.completedReps} reps ·{" "}
-              {Math.floor(summary.completedReps / targetReps)} completed sets
-            </strong>
-            <p>
-              Form score: {snapshot.formScore}% · Active duration: {seconds}s
-            </p>
-            <p>{summary.goodReps} reps without a sustained form warning.</p>
-          </div>
+      <section className={styles.summary}>
+        <p className={styles.kicker}>WORKOUT COMPLETE</p>
+        <h2>{exerciseConfig[exercise].name}</h2>
+        <div className={styles.summaryGrid}>
+          <div><strong>{summary.completedReps}</strong><span>reps</span></div>
+          <div><strong>{Math.floor(summary.completedReps / targetReps)}</strong><span>sets</span></div>
+          <div><strong>{snapshot.formScore}</strong><span>form score</span></div>
+          <div><strong>{String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}</strong><span>duration</span></div>
         </div>
-        <h3>Form review</h3>
-        <ul>
+        <div className={styles.review}><h3>Form review</h3><p>✓ {summary.goodReps} clean reps</p><ul>
           {summary.issues.map((issue) => (
             <li key={issue.type}>
-              {issue.message} — {issue.count} events
+              ⚠ {issue.message} — {issue.count}
             </li>
           ))}
-        </ul>
+        </ul></div>
         {!summary.completedReps && (
           <p>
             No complete repetitions detected. Start another session and move
@@ -169,11 +166,11 @@ export default function PostureCoach() {
     );
 
   return (
-    <section>
+    <section className={styles.postureCoach}>
       {!active ? (
         <>
-          <h2>Choose your exercise</h2>
-          <div className={styles.row}>
+          <div className={styles.setup}><p className={styles.kicker}>START A SESSION</p><h2>Choose your exercise</h2>
+          <div className={styles.exerciseSelector}>
             {exerciseIds.map((id) => (
               <button
                 key={id}
@@ -225,10 +222,12 @@ export default function PostureCoach() {
             Camera analysis runs in your browser. Iron Forge saves workout
             metrics, not your workout video.
           </p>
-          <button onClick={start}>Enable camera & start AI coach</button>
+          <button className={styles.startButton} onClick={start}>Enable camera & start AI coach</button></div>
         </>
       ) : (
         <>
+          <div className={styles.liveShell}>
+            <div className={styles.liveHeader}><strong>{exerciseConfig[exercise].name}</strong><span><i /> LIVE</span><time>{String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}</time></div>
           <div className={styles.live}>
             <CameraStage
               exercise={exercise}
@@ -268,12 +267,13 @@ export default function PostureCoach() {
                 {snapshot.angle ?? "—"}°
               </div>
               <div className={styles.feedback} role="status">
-                <b>{snapshot.status.replaceAll("_", " ")}</b>
+                <b>{snapshot.status === "POSE_FOUND" ? "Pose found ✓" : snapshot.status.replaceAll("_", " ")}</b>
                 <p>{snapshot.message}</p>
               </div>
+              {showPoseDebug && <code className={styles.debug}>Elbow: {snapshot.angle ?? "—"}° · Body: {snapshot.bodyAngle ?? "—"}° · Side: {snapshot.side ?? "—"}<br />Tracking: {snapshot.status} · Stage: {snapshot.stage}</code>}
             </aside>
           </div>
-          <div className={styles.row}>
+          <div className={styles.controls}>
             <button onClick={() => setPaused(!paused)} disabled={!ready}>
               {paused ? "Resume" : "Pause"}
             </button>
@@ -281,6 +281,7 @@ export default function PostureCoach() {
               {muted ? "Unmute voice" : "Mute voice"}
             </button>
             <button onClick={() => finish()}>Finish workout</button>
+          </div>
           </div>
         </>
       )}

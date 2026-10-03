@@ -15,7 +15,7 @@ export default function CustomerWorkoutsPage() {
   const cardio = cardioWorkouts.slice(0, 3);
 
   return (
-    <div style={styles.page}>
+    <div className="immersive-page training-immersive" style={styles.page}>
       <section style={styles.hero}>
         <div>
           <p style={styles.eyebrow}>WORKOUT COMMAND</p>
@@ -112,7 +112,7 @@ export default function CustomerWorkoutsPage() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  page: { padding: 32 },
+  page: { minHeight: "100vh", padding: "clamp(24px,4vw,52px)", color: theme.textPrimary, background: "#0d0e12" },
   hero: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1fr) 320px",
@@ -136,8 +136,9 @@ const styles: Record<string, CSSProperties> = {
     lineHeight: 1,
     maxWidth: 900,
     margin: "12px 0",
+    color: "#fff",
   },
-  copy: { color: theme.textSecondary, lineHeight: 1.75, maxWidth: 760 },
+  copy: { color: "#b7bdc8", lineHeight: 1.75, maxWidth: 760 },
   heroActions: { display: "flex", flexWrap: "wrap", gap: 12, marginTop: 24 },
   primaryButton: {
     background: theme.gradient,
@@ -165,6 +166,7 @@ const styles: Record<string, CSSProperties> = {
     gap: 14,
     padding: 24,
     boxShadow: "0 24px 80px rgba(0,0,0,0.28)",
+    color: "#fff",
   },
   focusLabel: { color: theme.gold, fontSize: 12, textTransform: "uppercase" },
   grid: {
@@ -185,10 +187,10 @@ const styles: Record<string, CSSProperties> = {
     transition: "transform 0.26s ease, border-color 0.26s ease, box-shadow 0.26s ease",
   },
   number: { color: theme.accent, fontWeight: 950 },
-  cardMeta: { color: theme.textMuted, fontSize: 12, textTransform: "uppercase" },
-  cardTitle: { fontSize: 28, margin: "8px 0" },
-  cardCopy: { color: theme.textSecondary, lineHeight: 1.6, minHeight: 52 },
-  chips: { display: "flex", flexWrap: "wrap", gap: 8, margin: "16px 0" },
+  cardMeta: { color: "#c7ccd5", fontSize: 12, textTransform: "uppercase" },
+  cardTitle: { color: "#fff", fontSize: 28, margin: "8px 0" },
+  cardCopy: { color: "#d2d6dd", lineHeight: 1.6, minHeight: 52 },
+  chips: { display: "flex", flexWrap: "wrap", gap: 8, margin: "16px 0", color: "#fff" },
   cardLink: { color: theme.gold, fontWeight: 900, textDecoration: "none" },
   split: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
   panel: {
@@ -196,8 +198,9 @@ const styles: Record<string, CSSProperties> = {
     borderRadius: 12,
     padding: 24,
     background: theme.surface,
+    color: "#fff",
   },
-  sectionTitle: { fontSize: 38, lineHeight: 1, margin: "10px 0 18px" },
+  sectionTitle: { color: "#fff", fontSize: 38, lineHeight: 1, margin: "10px 0 18px" },
   groupList: { display: "grid", gap: 10 },
   groupRow: {
     display: "grid",
@@ -221,5 +224,6 @@ const styles: Record<string, CSSProperties> = {
     alignContent: "end",
     gap: 5,
     border: `1px solid ${theme.border}`,
+    color: "#fff",
   },
 };

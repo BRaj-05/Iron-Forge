@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PublicPageShell from "@/components/home/PublicPageShell";
+import ImmersiveTrainingShowcase from "@/components/home/ImmersiveTrainingShowcase";
 import FadeInSection from "@/components/motion/FadeInSection";
 import Card from "@/components/ui/Card";
 import {
@@ -156,6 +157,8 @@ export default function HomePage() {
           </div>
         </motion.aside>
       </section>
+
+      <ImmersiveTrainingShowcase />
 
       <section className="if-section">
         <p className="if-kicker">Fitness Education Stack</p>

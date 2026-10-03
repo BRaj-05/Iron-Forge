@@ -38,6 +38,28 @@ export type MuscleGroup = {
   equipmentNeeded: string[];
 };
 
+
+const exerciseVideoFallbackByMuscle: Record<string, string> = {
+  chest: "84ObaROTa78",
+  back: "NaU8mlULPmY",
+  shoulders: "Z5g48LuHB9s",
+  biceps: "LhRQiKOO8P4",
+  triceps: "iwQPOuFQyXY",
+  legs: "UXJrBgI2RxA",
+  core: "4E1QqHIO_Ys",
+};
+
+const exerciseVideoMap: Record<string, string> = {
+  "push-up": "Q7cPaJZoOng",
+  "squat": "UXJrBgI2RxA",
+  "walking-lunge": "7mDWDlzFobQ",
+  "lat-pulldown": "u3gQT2aMVaI",
+  "dumbbell-shoulder-press": "Z5g48LuHB9s",
+  "side-plank": "K2VljzCC16g",
+  "bent-over-row": "NaU8mlULPmY",
+  "one-arm-dumbbell-row": "NaU8mlULPmY",
+};
+
 const exerciseImageMap: Record<string, string> = {
   CHEST: "https://images.unsplash.com/photo-1581009137042-c552e485697a?auto=format&fit=crop&w=1400&q=85",
   BACK: "https://images.unsplash.com/photo-1603287681836-b174ce5074c2?auto=format&fit=crop&w=1400&q=85",
@@ -372,7 +394,7 @@ function buildExercise(
       advanced: "4-5 sets with planned load progression",
     },
     alternatives: item.alternatives,
-    youtubeId: "",
+    youtubeId: exerciseVideoMap[slugify(item.name)] || exerciseVideoFallbackByMuscle[group.slug] || "",
     imageSlot: group.imageSlot,
     mainBenefit: item.benefit,
   };

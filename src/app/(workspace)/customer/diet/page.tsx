@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { CSSProperties } from "react";
+import { Check, Droplets, Flame, Sparkles } from "lucide-react";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import { Select } from "@/components/ui/FormField";
 import { nutritionPlans } from "@/lib/cardio-nutrition-data";
 import { NUTRITION_IMAGE_URLS } from "@/lib/media";
-import { theme } from "@/lib/theme";
 import { apiRoutes } from "@/config/api-routes";
 
 type MealKey = "breakfast" | "lunch" | "snack" | "dinner";
@@ -57,6 +55,7 @@ export default function CustomerDietPage() {
   }
 
   const completed = Object.values(meals).filter(Boolean).length;
+  const dayScore = Math.round(((completed / 4) * 70) + (Math.min(water, 8) / 8) * 30);
 
   async function saveDietHistory() {
     if (!selectedPlan) return;
@@ -80,19 +79,19 @@ export default function CustomerDietPage() {
   }
 
   return (
-    <div style={styles.page}>
-      <Card style={styles.hero}>
-        <p style={styles.eyebrow}>DIET COMPASS</p>
-        <h1 style={styles.title}>Eat with a plan, then mark the day honestly.</h1>
-        <p style={styles.copy}>
+    <div className="nutrition-command-page">
+      <section className="nutrition-command-hero">
+        <p className="if-kicker">DIET COMPASS</p>
+        <h1>Eat with a plan, then mark the day honestly.</h1>
+        <p className="nutrition-hero-copy">
           Choose a goal template, track meals, and keep hydration visible. These
           plans are educational, so medical conditions should still be reviewed
           with a doctor or registered dietitian.
         </p>
-      </Card>
+      </section>
 
-      <section style={styles.controls}>
-        <div>
+      <section className="nutrition-control-grid">
+        <div className="nutrition-plan-control">
           <Select
             label="Active plan"
             value={selectedSlug}
@@ -105,73 +104,95 @@ export default function CustomerDietPage() {
             ))}
           </Select>
         </div>
-        <Card style={styles.waterCard}>
-          <span>Water</span>
-          <strong>{water}/8 glasses</strong>
+
+        <article className="nutrition-mini-card">
+          <span className="nutrition-mini-icon"><Droplets size={17} /></span>
           <div>
-            <Button variant="secondary" onClick={() => updateWater(water - 1)} style={styles.smallButton}>-</Button>
-            <Button variant="secondary" onClick={() => updateWater(water + 1)} style={styles.smallButton}>+</Button>
+            <small>Hydration</small>
+            <strong>{water}/8</strong>
           </div>
-        </Card>
-        <Card style={styles.waterCard}>
-          <span>Meals Checked</span>
-          <strong>{completed}/4</strong>
-          <small>{completed < 3 ? "Do not let the day get away from you." : "Nice, the basics are protected."}</small>
-        </Card>
-        <Button onClick={saveDietHistory} style={styles.saveButton}>Save diet history</Button>
+          <div className="nutrition-water-controls">
+            <Button variant="secondary" onClick={() => updateWater(water - 1)}>-</Button>
+            <Button variant="secondary" onClick={() => updateWater(water + 1)}>+</Button>
+          </div>
+        </article>
+
+        <article className="nutrition-mini-card">
+          <span className="nutrition-mini-icon"><Check size={17} /></span>
+          <div>
+            <small>Meals checked</small>
+            <strong>{completed}/4</strong>
+          </div>
+          <em>{completed < 3 ? "Keep the day moving." : "Strong consistency."}</em>
+        </article>
+
+        <article className="nutrition-score-card">
+          <span><Flame size={16} /> Daily score</span>
+          <strong>{dayScore}%</strong>
+          <div className="nutrition-score-track"><span style={{ width: dayScore + "%" }} /></div>
+        </article>
+
+        <Button onClick={saveDietHistory} className="nutrition-save-button">
+          Save today
+        </Button>
       </section>
 
-      {status && <Card accent={theme.green} style={styles.message}>{status}</Card>}
+      {status && <div className="nutrition-message">{status}</div>}
 
       {selectedPlan && (
-        <section style={styles.planShell}>
+        <section className="nutrition-plan-shell">
           <div
+            className="nutrition-plan-photo"
             style={{
-              ...styles.planPhoto,
               backgroundImage: `linear-gradient(180deg, rgba(10,10,15,0.04), rgba(10,10,15,0.78)), url(${NUTRITION_IMAGE_URLS[selectedPlan.slug] || NUTRITION_IMAGE_URLS["maintenance-habit-plan"]})`,
             }}
           >
-            <span style={styles.photoTag}>{selectedPlan.goal}</span>
+            <span className="nutrition-photo-tag">{selectedPlan.goal}</span>
             <h2>{selectedPlan.name}</h2>
           </div>
-          <div style={styles.planGrid}>
-            {(Object.keys(selectedPlan.meals) as MealKey[]).map((key) => (
-              <Card
+          <div className="nutrition-meal-timeline">
+            <div className="nutrition-meal-timeline-head">
+              <div>
+                <p className="if-kicker">Today&apos;s meals</p>
+                <h2>Eat through the day with structure.</h2>
+              </div>
+              <span><Sparkles size={15} /> {completed}/4 complete</span>
+            </div>
+
+            {(Object.keys(selectedPlan.meals) as MealKey[]).map((key, index) => (
+              <article
                 key={key}
-                accent={meals[key] ? theme.green : undefined}
-                style={{
-                  ...styles.mealCard,
-                  borderColor: meals[key] ? `${theme.green}88` : theme.border,
-                }}
+                className={"nutrition-meal-row " + (meals[key] ? "is-done" : "")}
               >
-                <div>
-                  <p style={styles.mealLabel}>{mealLabels[key]}</p>
-                  <h2>{selectedPlan.meals[key]}</h2>
+                <div className="nutrition-meal-step">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <i />
+                </div>
+                <div className="nutrition-meal-copy">
+                  <p className="nutrition-meal-label">{mealLabels[key]}</p>
+                  <h3>{selectedPlan.meals[key]}</h3>
                 </div>
                 <Button
                   variant={meals[key] ? "success" : "secondary"}
                   onClick={() => toggleMeal(key)}
-                  style={{
-                    ...styles.markButton,
-                    color: meals[key] ? "#03140a" : theme.textPrimary,
-                  }}
+                  className="nutrition-mark-button"
                 >
                   {meals[key] ? "Done" : "Mark"}
                 </Button>
-              </Card>
+              </article>
             ))}
           </div>
         </section>
       )}
 
       {selectedPlan && (
-        <section style={styles.notes}>
+        <section className="nutrition-plan-notes">
           <div>
-            <p style={styles.eyebrow}>PLAN DETAILS</p>
-            <h2 style={styles.sectionTitle}>{selectedPlan.goal}</h2>
+            <p className="if-kicker">PLAN DETAILS</p>
+            <h2>{selectedPlan.goal}</h2>
             <p>{selectedPlan.dietType} · {selectedPlan.caloriesRange} · {selectedPlan.proteinTarget}</p>
           </div>
-          <div style={styles.noteGrid}>
+          <div className="nutrition-note-grid">
             {selectedPlan.notes.map((note) => <span key={note}>{note}</span>)}
             {selectedPlan.warnings.map((warning) => <span key={warning}>{warning}</span>)}
           </div>
@@ -181,40 +202,4 @@ export default function CustomerDietPage() {
   );
 }
 
-const styles: Record<string, CSSProperties> = {
-  page: { padding: 32 },
-  hero: {
-    padding: 34,
-    marginBottom: 22,
-    background:
-      "radial-gradient(circle at 85% 16%, rgba(251,191,36,0.22), transparent 30%), linear-gradient(135deg,#111118,#120f07)",
-  },
-  eyebrow: { color: theme.gold, fontSize: 10, letterSpacing: 4, fontWeight: 950 },
-  title: { fontSize: "clamp(34px, 5vw, 66px)", lineHeight: 1, maxWidth: 940, margin: "12px 0" },
-  copy: { color: theme.textSecondary, lineHeight: 1.75, maxWidth: 820 },
-  controls: { display: "grid", gridTemplateColumns: "1.3fr .75fr .75fr auto", gap: 14, marginBottom: 18, alignItems: "stretch" },
-  waterCard: {
-    padding: 18,
-    display: "grid",
-    gap: 8,
-  },
-  smallButton: {
-    width: 38,
-    minHeight: 34,
-    height: 34,
-    padding: 0,
-    marginRight: 8,
-  },
-  saveButton: { alignSelf: "end" },
-  message: { background: `${theme.green}12`, color: theme.green, padding: 13, marginBottom: 18 },
-  planShell: { display: "grid", gridTemplateColumns: "minmax(280px, 0.65fr) minmax(0, 1fr)", gap: 18, alignItems: "stretch" },
-  planPhoto: { minHeight: 520, borderRadius: 14, border: `1px solid ${theme.border}`, backgroundSize: "cover", backgroundPosition: "center", padding: 24, display: "grid", alignContent: "end", overflow: "hidden" },
-  photoTag: { color: theme.gold, textTransform: "uppercase", letterSpacing: 3, fontWeight: 950, fontSize: 11 },
-  planGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(220px, 1fr))", gap: 14 },
-  mealCard: { padding: 18, minHeight: 150, display: "grid", gridTemplateColumns: "1fr auto", gap: 14, alignItems: "start", transition: "transform 0.22s ease, border-color 0.22s ease" },
-  mealLabel: { color: theme.textMuted, textTransform: "uppercase", fontSize: 12 },
-  markButton: { minHeight: 38, alignSelf: "flex-start" },
-  notes: { marginTop: 18, border: `1px solid ${theme.border}`, borderRadius: 12, background: theme.surfaceAlt, padding: 24 },
-  sectionTitle: { fontSize: 36, margin: "8px 0" },
-  noteGrid: { display: "flex", flexWrap: "wrap", gap: 10, marginTop: 18 },
-};
+/* legacy styles removed */

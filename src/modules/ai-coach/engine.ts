@@ -1,4 +1,4 @@
-import { analyzePose } from "./exercises";
+import { analyzePose, exerciseConfig } from "./exercises";
 import type { ExerciseId, Point, Snapshot } from "./types";
 
 export function formScore(reps: number, goodReps: number) {
@@ -13,6 +13,7 @@ export class WorkoutEngine {
   private lastTime = 0;
   private lastRep = -Infinity;
   private missingSince: number | null = null;
+  private smoothedAngle: number | null = null;
   private issueSince = new Map<string, number>();
   private emitted = new Set<string>();
   private dirtyRep = false;
@@ -33,24 +34,32 @@ export class WorkoutEngine {
     this.emitted.clear();
     this.dirtyRep = false;
     this.moved = false;
+    this.smoothedAngle = null;
   }
 
   update(points: Point[], time: number, aspect = 1): Snapshot {
-    if (time - this.lastTime > 700) this.resetTracking();
+    if (this.lastTime && time - this.lastTime > 1200) this.resetTracking();
     this.lastTime = time;
     const analysis = analyzePose(this.exercise, points, aspect, this.side);
     let message = "Get into your starting position.";
-    let status: Snapshot["status"] = "GOOD";
+    let status: Snapshot["status"] = "POSE_FOUND";
     if (!analysis) {
       this.missingSince ??= time;
-      this.resetTracking();
-      status = "NO_POSE";
-      message =
-        time - this.missingSince > 700
-          ? "No pose detected — step back and keep your full body in frame."
-          : "Finding a clear view…";
+      const missingFor = time - this.missingSince;
+      if (missingFor > 900) {
+        this.resetTracking();
+        this.missingSince = time - 901;
+        status = "NO_POSE";
+        message = "Step into frame and keep your working side visible.";
+      } else {
+        status = "PARTIAL_POSE";
+        message = "Partial pose — keep your working arm and torso visible.";
+      }
     } else {
       this.missingSince = null;
+      this.smoothedAngle = this.smoothedAngle === null
+        ? analysis.angle
+        : this.smoothedAngle * 0.62 + analysis.angle * 0.38;
       const present = new Set(analysis.issues.map((item) => item.type));
       for (const key of this.issueSince.keys())
         if (!present.has(key)) this.issueSince.delete(key);
@@ -72,7 +81,11 @@ export class WorkoutEngine {
           }
         }
       }
-      const next = analysis.start ? "START" : analysis.peak ? "PEAK" : "MIDDLE";
+      const config = exerciseConfig[this.exercise];
+      const press = this.exercise === "SHOULDER_PRESS";
+      const start = press ? this.smoothedAngle <= config.low : this.smoothedAngle >= config.high;
+      const peak = press ? this.smoothedAngle >= config.high && analysis.peakGate : this.smoothedAngle <= config.low;
+      const next = start ? "START" : peak ? "PEAK" : "MIDDLE";
       if (next !== this.candidate) {
         this.candidate = next;
         this.since = time;
@@ -100,7 +113,7 @@ export class WorkoutEngine {
           this.moved = false;
         }
       }
-      if (status === "GOOD" && this.phase !== "READY")
+      if (status === "POSE_FOUND" && this.phase !== "READY")
         message =
           this.phase === "PEAK"
             ? "Good range. Return under control."
@@ -110,11 +123,13 @@ export class WorkoutEngine {
       reps: this.reps,
       goodReps: this.goodReps,
       stage: this.phase,
-      angle: analysis ? Math.round(analysis.angle) : null,
+      angle: this.smoothedAngle === null ? null : Math.round(this.smoothedAngle),
       status,
       message,
       issues: [...this.issues.values()],
       formScore: formScore(this.reps, this.goodReps),
+      side: analysis ? (analysis.side === 0 ? "LEFT" : "RIGHT") : this.side === undefined ? null : this.side === 0 ? "LEFT" : "RIGHT",
+      bodyAngle: analysis?.bodyAngle == null ? null : Math.round(analysis.bodyAngle),
     };
   }
 }
