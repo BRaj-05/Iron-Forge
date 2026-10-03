@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Check, Droplets, Flame, Sparkles } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/FormField";
 import { nutritionPlans } from "@/lib/cardio-nutrition-data";
@@ -54,6 +55,7 @@ export default function CustomerDietPage() {
   }
 
   const completed = Object.values(meals).filter(Boolean).length;
+  const dayScore = Math.round(((completed / 4) * 70) + (Math.min(water, 8) / 8) * 30);
 
   async function saveDietHistory() {
     if (!selectedPlan) return;
@@ -89,7 +91,7 @@ export default function CustomerDietPage() {
       </section>
 
       <section className="nutrition-control-grid">
-        <div>
+        <div className="nutrition-plan-control">
           <Select
             label="Active plan"
             value={selectedSlug}
@@ -102,20 +104,37 @@ export default function CustomerDietPage() {
             ))}
           </Select>
         </div>
+
         <article className="nutrition-mini-card">
-          <span>Water</span>
-          <strong>{water}/8 glasses</strong>
+          <span className="nutrition-mini-icon"><Droplets size={17} /></span>
+          <div>
+            <small>Hydration</small>
+            <strong>{water}/8</strong>
+          </div>
           <div className="nutrition-water-controls">
             <Button variant="secondary" onClick={() => updateWater(water - 1)}>-</Button>
             <Button variant="secondary" onClick={() => updateWater(water + 1)}>+</Button>
           </div>
         </article>
+
         <article className="nutrition-mini-card">
-          <span>Meals Checked</span>
-          <strong>{completed}/4</strong>
-          <small>{completed < 3 ? "Do not let the day get away from you." : "Nice, the basics are protected."}</small>
+          <span className="nutrition-mini-icon"><Check size={17} /></span>
+          <div>
+            <small>Meals checked</small>
+            <strong>{completed}/4</strong>
+          </div>
+          <em>{completed < 3 ? "Keep the day moving." : "Strong consistency."}</em>
         </article>
-        <Button onClick={saveDietHistory} className="nutrition-save-button">Save diet history</Button>
+
+        <article className="nutrition-score-card">
+          <span><Flame size={16} /> Daily score</span>
+          <strong>{dayScore}%</strong>
+          <div className="nutrition-score-track"><span style={{ width: dayScore + "%" }} /></div>
+        </article>
+
+        <Button onClick={saveDietHistory} className="nutrition-save-button">
+          Save today
+        </Button>
       </section>
 
       {status && <div className="nutrition-message">{status}</div>}
@@ -131,15 +150,27 @@ export default function CustomerDietPage() {
             <span className="nutrition-photo-tag">{selectedPlan.goal}</span>
             <h2>{selectedPlan.name}</h2>
           </div>
-          <div className="nutrition-meal-grid">
-            {(Object.keys(selectedPlan.meals) as MealKey[]).map((key) => (
+          <div className="nutrition-meal-timeline">
+            <div className="nutrition-meal-timeline-head">
+              <div>
+                <p className="if-kicker">Today&apos;s meals</p>
+                <h2>Eat through the day with structure.</h2>
+              </div>
+              <span><Sparkles size={15} /> {completed}/4 complete</span>
+            </div>
+
+            {(Object.keys(selectedPlan.meals) as MealKey[]).map((key, index) => (
               <article
                 key={key}
-                className={"nutrition-meal-card " + (meals[key] ? "is-done" : "")}
+                className={"nutrition-meal-row " + (meals[key] ? "is-done" : "")}
               >
-                <div>
+                <div className="nutrition-meal-step">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <i />
+                </div>
+                <div className="nutrition-meal-copy">
                   <p className="nutrition-meal-label">{mealLabels[key]}</p>
-                  <h2>{selectedPlan.meals[key]}</h2>
+                  <h3>{selectedPlan.meals[key]}</h3>
                 </div>
                 <Button
                   variant={meals[key] ? "success" : "secondary"}
