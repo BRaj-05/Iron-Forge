@@ -149,36 +149,44 @@
   min-height: 90px;
 }
 .progress {
-  margin: 22px 0 0;
+  margin: 18px 0 0;
   padding: 24px;
-  border: 1px solid #dfdcd4;
-  border-radius: 14px;
-  background: rgba(255,255,255,.8);
-  color: #292825;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  background: linear-gradient(145deg,#14171e,#0f1116);
+  color: white;
   box-shadow: none;
 }
 .progress h2,
 .progress h3 {
-  color: #292825;
+  color: white;
+}
+.progress h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+.progress h3 {
+  margin-top: 20px;
 }
 .progress p,
 .progress li,
 .progress span {
-  color: #77736c;
+  color: #949ba7;
 }
 .progress a {
-  color: #df651b;
+  color: #fb923c;
   font-weight: 800;
 }
 .progress button {
   margin-left: 8px;
   padding: 7px 10px;
-  border: 1px solid #e1ddd5;
+  border: 1px solid rgba(255,255,255,.1);
   border-radius: 8px;
-  color: #d85d15;
-  background: #fff3eb;
+  color: white;
+  background: rgba(249,115,22,.12);
 }
 .progress ul {
+  margin-top: 14px;
   padding-left: 20px;
   line-height: 1.9;
 }
