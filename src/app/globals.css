@@ -1847,3 +1847,664 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   }
 }
 
+
+
+/* Premium internal workspace pages -------------------------------------- */
+.progress-lab-page,
+.calendar-premium-page,
+.task-command-page,
+.nutrition-command-page {
+  width: 100%;
+  padding: clamp(22px, 4vw, 52px);
+  background:
+    radial-gradient(circle at 88% 4%, rgba(249,115,22,.08), transparent 28rem),
+    #0b0d11;
+  color: #f8fafc;
+}
+
+.progress-lab-hero,
+.calendar-premium-hero,
+.task-command-hero {
+  min-height: 360px;
+  padding: clamp(28px, 5vw, 64px);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 24px;
+  display: grid;
+  grid-template-columns: minmax(0,1.45fr) minmax(260px,.55fr);
+  gap: 28px;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,.25);
+}
+.progress-lab-copy h1,
+.calendar-premium-hero h1,
+.task-command-hero h1,
+.nutrition-command-hero h1 {
+  max-width: 860px;
+  margin: 10px 0 16px;
+  color: white;
+  font-size: clamp(42px, 6vw, 80px);
+  line-height: .95;
+  letter-spacing: -.05em;
+}
+.progress-lab-copy > p:not(.if-kicker),
+.calendar-premium-hero > div > p:not(.if-kicker),
+.task-command-hero > div > p:not(.if-kicker),
+.nutrition-hero-copy {
+  max-width: 760px;
+  color: #a8aeb8;
+  line-height: 1.7;
+  font-size: 14px;
+}
+.progress-lab-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.progress-lab-actions a,
+.calendar-premium-hero > div > a {
+  min-height: 44px;
+  padding: 0 15px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  background: linear-gradient(135deg,#f97316,#ef4444);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 900;
+}
+.progress-lab-actions a.is-secondary {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.055);
+}
+.progress-score-card,
+.calendar-hero-card,
+.task-command-score {
+  min-height: 230px;
+  padding: 25px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 18px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  color: white;
+  background: rgba(16,18,24,.72);
+  backdrop-filter: blur(16px);
+}
+.progress-score-card > span,
+.calendar-hero-card > span,
+.task-command-score > span {
+  color: #fb923c;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.progress-score-card > strong,
+.calendar-hero-card > strong,
+.task-command-score > strong {
+  font-size: clamp(38px,4vw,62px);
+  line-height: 1;
+}
+.progress-score-card > small,
+.calendar-hero-card > small,
+.task-command-score > small {
+  color: #969daa;
+  line-height: 1.5;
+}
+.progress-score-ring {
+  width: 120px;
+  aspect-ratio: 1;
+  margin-top: 14px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  background:
+    radial-gradient(circle at center,#151821 58%,transparent 60%),
+    conic-gradient(#f97316 var(--progress), rgba(255,255,255,.08) 0);
+}
+.progress-score-ring b { font-size: 23px; }
+.progress-score-ring em { color: #8c939f; font-size: 8px; font-style: normal; text-transform: uppercase; }
+
+.progress-metric-grid {
+  margin: 18px 0;
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 12px;
+}
+.progress-metric-card {
+  min-height: 130px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(145deg,#151820,#101217);
+}
+.progress-metric-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.055);
+}
+.progress-metric-card small { color: #8c939f; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
+.progress-metric-card strong { display: block; margin: 6px 0 4px; color: white; font-size: 27px; }
+.progress-metric-card p { color: #737b88; font-size: 10px; }
+.tone-gold .progress-metric-icon { color: #fbbf24; background: rgba(251,191,36,.1); }
+.tone-green .progress-metric-icon { color: #22c55e; background: rgba(34,197,94,.1); }
+.tone-orange .progress-metric-icon { color: #f97316; background: rgba(249,115,22,.1); }
+.tone-blue .progress-metric-icon { color: #38bdf8; background: rgba(56,189,248,.1); }
+
+.progress-chart-layout {
+  display: grid;
+  grid-template-columns: minmax(0,1.4fr) minmax(340px,.6fr);
+  gap: 14px;
+}
+.progress-chart-card {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  background: linear-gradient(145deg,#14171e,#0f1116);
+}
+.progress-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+.progress-card-head h2 {
+  margin-top: 4px;
+  color: white;
+  font-size: 27px;
+}
+.progress-card-copy {
+  margin: 7px 0 18px;
+  color: #808794;
+  font-size: 11px;
+}
+.progress-mini-badge {
+  padding: 7px 10px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fb923c;
+  background: rgba(249,115,22,.1);
+  font-size: 9px;
+  font-weight: 800;
+}
+.progress-chart { min-height: 300px; }
+.progress-empty-state {
+  min-height: 210px;
+  margin-top: 16px;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  background: #12151b;
+}
+.progress-empty-state > span {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fb923c;
+  background: rgba(249,115,22,.1);
+}
+.progress-empty-state h2 { color: white; margin-bottom: 6px; }
+.progress-empty-state p:not(.if-kicker) { color: #8a919d; }
+.progress-empty-state > a {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: white;
+  background: #f97316;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+/* AI form progress inside dark progress lab */
+.progress-lab-page :global(.progress) {}
+.progress-lab-page section[class*="progress"] {
+  box-shadow: none;
+}
+.progress-lab-page .progress,
+.progress-lab-page section.progress {
+  color: white !important;
+  background: linear-gradient(145deg,#14171e,#0f1116) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+.progress-lab-page .progress h2,
+.progress-lab-page .progress h3 { color: white !important; }
+.progress-lab-page .progress p,
+.progress-lab-page .progress li,
+.progress-lab-page .progress span { color: #949ba7 !important; }
+
+/* Calendar */
+.calendar-premium-page { min-height: 100vh; }
+.calendar-strip {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(7,minmax(190px,1fr));
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scroll-snap-type: x mandatory;
+}
+.calendar-modern-day {
+  min-height: 330px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 17px;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(249,115,22,.08),transparent 45%),
+    #12151b;
+  scroll-snap-align: start;
+  transition: transform .2s ease,border-color .2s ease;
+}
+.calendar-modern-day:hover {
+  transform: translateY(-4px);
+  border-color: rgba(249,115,22,.35);
+}
+.calendar-modern-day.is-today {
+  border-color: rgba(249,115,22,.75);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(249,115,22,.22),transparent 48%),
+    #15171d;
+}
+.calendar-modern-day header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.calendar-modern-day header > div { display: grid; gap: 4px; }
+.calendar-modern-day header span { color: #f97316; font-size: 9px; }
+.calendar-modern-day header h2 { font-size: 22px; }
+.calendar-modern-day header b {
+  padding: 5px 8px;
+  border-radius: 99px;
+  color: #fb923c;
+  background: rgba(249,115,22,.11);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+.calendar-modern-sessions {
+  margin-top: auto;
+  display: grid;
+  gap: 9px;
+}
+.calendar-modern-sessions > div {
+  min-height: 82px;
+  padding: 12px;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,.045);
+}
+.calendar-session-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #fb923c;
+  background: rgba(249,115,22,.1);
+}
+.calendar-modern-sessions small {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #7f8794;
+  font-size: 8px;
+}
+.calendar-modern-sessions strong {
+  display: block;
+  margin-top: 4px;
+  color: #f5f7fa;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+/* Tasks */
+.task-command-grid {
+  margin: 18px 0;
+  display: grid;
+  grid-template-columns: minmax(0,1.4fr) minmax(300px,.6fr);
+  gap: 14px;
+}
+.task-create-card,
+.task-insight-card,
+.task-board {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  background: linear-gradient(145deg,#151820,#101217);
+}
+.task-create-card { padding: 24px; }
+.task-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.task-card-heading > span,
+.task-insight-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fb923c;
+  background: rgba(249,115,22,.1);
+}
+.task-card-heading h2,
+.task-board-head h2 {
+  color: white;
+  font-size: 25px;
+}
+.task-form-modern {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 180px auto;
+  gap: 10px;
+  align-items: end;
+}
+.task-form-modern label > span { color: #9ba1ab !important; }
+.task-form-modern input,
+.task-form-modern select {
+  background: #0d0f14 !important;
+  color: white !important;
+  border-color: #30343d !important;
+}
+.task-insight-card {
+  padding: 24px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+.task-insight-card > span { color: #8e96a2; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
+.task-insight-card > strong { color: white; font-size: 54px; line-height: 1; }
+.task-insight-card > p { color: #7f8794; line-height: 1.5; }
+.task-insight-mini {
+  margin-top: 10px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fb923c;
+  font-size: 10px;
+}
+.task-board { padding: 24px; }
+.task-board-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.task-board-head > span {
+  padding: 6px 9px;
+  border-radius: 99px;
+  color: #8f96a3;
+  background: rgba(255,255,255,.05);
+  font-size: 9px;
+}
+.task-modern-list { display: grid; gap: 8px; }
+.task-modern-item {
+  min-height: 76px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 13px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,.025);
+}
+.task-modern-item.is-complete { opacity: .62; }
+.task-modern-check,
+.task-modern-delete {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.task-modern-check { color: #fb923c; background: rgba(249,115,22,.1); }
+.task-modern-item.is-complete .task-modern-check { color: #34d399; background: rgba(52,211,153,.1); }
+.task-modern-delete { color: #7c838e; background: transparent; }
+.task-modern-delete:hover { color: #f87171; background: rgba(248,113,113,.08); }
+.task-modern-copy { display: grid; gap: 5px; }
+.task-modern-copy > div { display: flex; align-items: center; gap: 8px; }
+.task-modern-copy strong { color: white; font-size: 12px; }
+.task-modern-item.is-complete strong { text-decoration: line-through; color: #8d949e; }
+.task-modern-copy small { color: #747c88; font-size: 9px; }
+.task-priority {
+  padding: 4px 7px;
+  border-radius: 99px;
+  font-size: 7px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.task-priority.tone-low { color:#38bdf8; background:rgba(56,189,248,.09); }
+.task-priority.tone-medium { color:#fbbf24; background:rgba(251,191,36,.09); }
+.task-priority.tone-high { color:#fb923c; background:rgba(251,146,60,.09); }
+.task-priority.tone-critical { color:#f87171; background:rgba(248,113,113,.09); }
+.task-empty-modern {
+  min-height: 230px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 9px;
+  color: #7f8794;
+  text-align: center;
+}
+.task-empty-modern svg { color: #fb923c; }
+.task-empty-modern h3 { color: white; font-size: 20px; }
+.task-loading-card { height: 100px; border-radius: 12px; background: #1b1e25; }
+.task-command-progress {
+  height: 7px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255,255,255,.08);
+}
+.task-command-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,#f97316,#fb923c);
+}
+
+/* Nutrition */
+.nutrition-command-page {
+  min-height: 100vh;
+  padding: clamp(22px,4vw,52px);
+  color: white;
+  background:
+    radial-gradient(circle at 85% 3%,rgba(251,191,36,.07),transparent 26rem),
+    #0b0d11;
+}
+.nutrition-command-hero {
+  min-height: 310px;
+  padding: clamp(28px,5vw,58px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  background:
+    radial-gradient(circle at 82% 15%,rgba(251,191,36,.17),transparent 28%),
+    linear-gradient(145deg,#15150f,#101116);
+}
+.nutrition-control-grid {
+  margin: 16px 0;
+  display: grid;
+  grid-template-columns: minmax(240px,1.15fr) .7fr .7fr auto;
+  gap: 10px;
+  align-items: stretch;
+}
+.nutrition-control-grid > div:first-child {
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 15px;
+  background: #14171e;
+}
+.nutrition-control-grid label > span { color: #9ca3af !important; }
+.nutrition-control-grid select {
+  background: #0e1015 !important;
+  color: white !important;
+  border-color: #323640 !important;
+}
+.nutrition-mini-card {
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 15px;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  background: #14171e;
+}
+.nutrition-mini-card > span,
+.nutrition-mini-card small { color: #8b929e; font-size: 9px; }
+.nutrition-mini-card strong { font-size: 20px; }
+.nutrition-water-controls { display: flex; gap: 6px; }
+.nutrition-water-controls button { width: 34px; min-height: 32px; padding: 0; }
+.nutrition-save-button { align-self: stretch !important; }
+.nutrition-message {
+  margin-bottom: 15px;
+  padding: 12px 15px;
+  border: 1px solid rgba(34,197,94,.25);
+  border-radius: 11px;
+  color: #86efac;
+  background: rgba(34,197,94,.08);
+}
+.nutrition-plan-shell {
+  display: grid;
+  grid-template-columns: minmax(300px,.75fr) minmax(0,1.25fr);
+  gap: 14px;
+}
+.nutrition-plan-photo {
+  min-height: 540px;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  display: grid;
+  align-content: end;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 28px 70px rgba(0,0,0,.2);
+}
+.nutrition-plan-photo h2 { margin-top: 7px; font-size: 32px; }
+.nutrition-photo-tag {
+  color: #fbbf24;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.nutrition-meal-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+}
+.nutrition-meal-card {
+  min-height: 260px;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 90% 0%,rgba(249,115,22,.06),transparent 40%),
+    #14171e;
+}
+.nutrition-meal-card.is-done {
+  border-color: rgba(34,197,94,.45);
+  background:
+    radial-gradient(circle at 90% 0%,rgba(34,197,94,.12),transparent 40%),
+    #14171e;
+}
+.nutrition-meal-label {
+  color: #fbbf24;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.nutrition-meal-card h2 {
+  margin-top: 9px;
+  color: white;
+  font-size: 18px;
+  line-height: 1.45;
+}
+.nutrition-mark-button { min-height: 38px !important; }
+.nutrition-plan-notes {
+  margin-top: 14px;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  background: linear-gradient(145deg,#151820,#101217);
+}
+.nutrition-plan-notes h2 { margin: 7px 0; font-size: 34px; }
+.nutrition-plan-notes p { color: #9097a2; line-height: 1.6; }
+.nutrition-note-grid {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.nutrition-note-grid span {
+  padding: 9px 11px;
+  border-radius: 10px;
+  color: #aab0ba;
+  background: rgba(255,255,255,.045);
+  font-size: 10px;
+}
+
+@media (max-width: 1050px) {
+  .progress-metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .progress-chart-layout,
+  .task-command-grid,
+  .nutrition-plan-shell { grid-template-columns: 1fr; }
+  .nutrition-control-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px) {
+  .progress-lab-hero,
+  .calendar-premium-hero,
+  .task-command-hero { grid-template-columns: 1fr; min-height: 0; }
+  .progress-metric-grid { grid-template-columns: 1fr; }
+  .progress-empty-state { grid-template-columns: 1fr; }
+  .calendar-strip { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 82vw; }
+  .task-form-modern { grid-template-columns: 1fr; }
+  .nutrition-control-grid,
+  .nutrition-meal-grid { grid-template-columns: 1fr; }
+}
+
