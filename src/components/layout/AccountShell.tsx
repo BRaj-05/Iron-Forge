@@ -15,6 +15,16 @@ export default function AccountShell({ role, children }: { role: AppRole; childr
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const items = workspaceNavigation[role];
+  const immersiveWorkspace =
+    role === "CUSTOMER" &&
+    [
+      "/customer/workouts",
+      "/customer/ai-coach",
+      "/customer/diet",
+      "/customer/progress",
+      "/customer/calendar",
+      "/customer/tasks",
+    ].some((route) => pathname === route || pathname.startsWith(route + "/"));
 
   useEffect(() => {
     setOpen(false);
@@ -36,7 +46,7 @@ export default function AccountShell({ role, children }: { role: AppRole; childr
   }, []);
 
   return (
-    <div className="account-shell unified-account-shell">
+    <div className={`account-shell unified-account-shell ${immersiveWorkspace ? "is-immersive-workspace" : ""}`}>
       <a href="#workspace-content" className="skip-link">Skip to content</a>
 
       <Header
@@ -104,7 +114,7 @@ export default function AccountShell({ role, children }: { role: AppRole; childr
         }
       />
 
-      <main id="workspace-content" className="account-content unified-account-content" tabIndex={-1}>
+      <main id="workspace-content" className={`account-content unified-account-content ${immersiveWorkspace ? "is-immersive-content" : ""}`} tabIndex={-1}>
         {children}
       </main>
     </div>
