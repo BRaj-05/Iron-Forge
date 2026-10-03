@@ -106,7 +106,7 @@ export default function ExerciseDetailView({ exercise }: { exercise: Exercise })
           <p className="if-kicker">Watch + understand</p>
           <h2>Learn the movement two ways.</h2>
           <p>
-            Read the setup and cues first, then use the demonstration to connect the words to the movement.
+            Read the setup and cues first, then use the video to connect the words to this exercise or its closest movement pattern.
           </p>
           {exercise.youtubeId ? (
             <div className="exercise-video-frame">
