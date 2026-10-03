@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { CSSProperties } from "react";
-import { Logo } from "@/components/layout/Logo";
+import { Activity, ArrowUpRight, Flame, Gauge, Medal, TrendingUp } from "lucide-react";
+import {
+  Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer,
+  Tooltip, XAxis, YAxis,
+} from "recharts";
 import { CountUp } from "@/components/motion/CountUp";
-import Card from "@/components/ui/Card";
-import { theme } from "@/lib/theme";
 import { apiRoutes } from "@/config/api-routes";
+import { experienceSlides } from "@/lib/experience-media";
 import FormProgress from "@/modules/ai-coach/FormProgress";
 
 type ProgressData = {
@@ -22,7 +23,10 @@ type ProgressData = {
   body: Array<{ week: string; weight: number; height: number }>;
 };
 
-const empty: ProgressData = { weeklyXP: 0, totalXP: 0, avgScore: 0, weightTrend: 0, level: 1, streak: 0, weekly: [], body: [] };
+const empty: ProgressData = {
+  weeklyXP: 0, totalXP: 0, avgScore: 0, weightTrend: 0,
+  level: 1, streak: 0, weekly: [], body: [],
+};
 
 export default function CustomerProgressPage() {
   const [data, setData] = useState<ProgressData>(empty);
@@ -34,95 +38,155 @@ export default function CustomerProgressPage() {
       .catch(() => setData(empty));
   }, []);
 
-  const hasProgress = (data.totalXP || data.weeklyXP) > 0 || data.body.some((item) => item.weight || item.height);
+  const hasProgress =
+    (data.totalXP || data.weeklyXP) > 0 ||
+    data.body.some((item) => item.weight || item.height);
+
+  const weeklyGoal = 1000;
+  const weeklyPercent = Math.min(100, Math.round((data.weeklyXP / weeklyGoal) * 100));
+  const activeDays = useMemo(
+    () => data.weekly.filter((day) => day.xp > 0).length,
+    [data.weekly],
+  );
 
   return (
-    <div style={styles.page}>
-      <Card style={styles.hero}>
-        <p style={styles.eyebrow}>PROGRESS LAB</p>
-        <h1 style={styles.title}>Progress</h1>
-        <p style={styles.copy}>
-          Track performance, consistency and form.
-        </p>
-      </Card>
+    <div className="progress-lab-page">
+      <section
+        className="progress-lab-hero"
+        style={{
+          backgroundImage:
+            "linear-gradient(90deg, rgba(7,8,11,.96), rgba(7,8,11,.72) 58%, rgba(7,8,11,.38)), url(" +
+            experienceSlides[0].image +
+            ")",
+        }}
+      >
+        <div className="progress-lab-copy">
+          <p className="if-kicker">Performance intelligence</p>
+          <h1>See the work becoming progress.</h1>
+          <p>
+            Training, consistency, body trends and AI form sessions come together
+            in one place so the next decision is obvious.
+          </p>
+          <div className="progress-lab-actions">
+            <Link href="/customer/daily-log">Log today <ArrowUpRight size={16} /></Link>
+            <Link href="/customer/ai-coach" className="is-secondary">Check form</Link>
+          </div>
+        </div>
 
-      <section style={styles.stats}>
-        <Stat label="Total XP" value={data.totalXP || data.weeklyXP} accent={theme.gold} />
-        <Stat label="Avg Score" value={data.avgScore} accent={theme.green} />
-        <Stat label="Weight Trend" value={data.weightTrend} suffix="kg" signed accent={theme.accent} />
-        <Stat label="Streak Days" value={data.streak} accent="#38BDF8" />
+        <div className="progress-score-card">
+          <span>Current level</span>
+          <strong>{data.level}</strong>
+          <small>{data.streak ? data.streak + "-day streak in motion" : "Build your first streak"}</small>
+          <div
+            className="progress-score-ring"
+            style={{ ["--progress" as string]: weeklyPercent + "%" }}
+          >
+            <b>{weeklyPercent}%</b>
+            <em>weekly goal</em>
+          </div>
+        </div>
+      </section>
+
+      <section className="progress-metric-grid" aria-label="Progress summary">
+        <Metric icon={<Medal size={18} />} label="Total XP" value={<CountUp value={data.totalXP || data.weeklyXP} />} detail={data.weeklyXP + " this week"} tone="gold" />
+        <Metric icon={<Gauge size={18} />} label="Avg score" value={<><CountUp value={data.avgScore} />%</>} detail="Daily performance" tone="green" />
+        <Metric icon={<TrendingUp size={18} />} label="Weight trend" value={<><CountUp value={data.weightTrend} />kg</>} detail="From saved measurements" tone="orange" />
+        <Metric icon={<Flame size={18} />} label="Consistency" value={<><CountUp value={activeDays} />/7</>} detail={data.streak + " day streak"} tone="blue" />
       </section>
 
       {hasProgress ? (
-        <section style={styles.chartGrid}>
-          <Card style={styles.panel}>
-            <p style={styles.eyebrow}>XP RHYTHM</p>
-            <h2 style={styles.sectionTitle}>This week</h2>
-            <div style={styles.chart}>
+        <section className="progress-chart-layout">
+          <article className="progress-chart-card is-wide">
+            <div className="progress-card-head">
+              <div>
+                <p className="if-kicker">XP rhythm</p>
+                <h2>Training momentum</h2>
+              </div>
+              <span className="progress-mini-badge"><Activity size={14} /> {data.weeklyXP} XP</span>
+            </div>
+            <p className="progress-card-copy">See exactly which days are carrying your week.</p>
+            <div className="progress-chart">
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={data.weekly}>
-                  <CartesianGrid stroke="rgba(35,33,30,0.08)" />
-                  <XAxis dataKey="day" stroke="#8a877f" />
-                  <YAxis stroke="#8a877f" />
-                  <Tooltip contentStyle={{ background: "#fff", color: "#292825", border: "1px solid #dfdcd4", borderRadius: 10 }} />
-                  <Area isAnimationActive type="monotone" dataKey="xp" stroke={theme.gold} fill="rgba(251,191,36,0.18)" />
+                  <defs>
+                    <linearGradient id="xpFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f97316" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="#f97316" stopOpacity={0.03} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="rgba(255,255,255,.06)" vertical={false} />
+                  <XAxis dataKey="day" stroke="#7f8490" axisLine={false} tickLine={false} />
+                  <YAxis stroke="#7f8490" axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ stroke: "rgba(249,115,22,.25)" }}
+                    contentStyle={{ background: "#14161c", color: "#fff", border: "1px solid #252934", borderRadius: 12 }}
+                  />
+                  <Area type="monotone" dataKey="xp" stroke="#f97316" strokeWidth={3} fill="url(#xpFill)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </Card>
-          <Card style={styles.panel}>
-            <p style={styles.eyebrow}>BODY TREND</p>
-            <h2 style={styles.sectionTitle}>Saved metrics</h2>
-            <div style={styles.chart}>
+          </article>
+
+          <article className="progress-chart-card">
+            <div className="progress-card-head">
+              <div>
+                <p className="if-kicker">Body trend</p>
+                <h2>Saved metrics</h2>
+              </div>
+            </div>
+            <p className="progress-card-copy">Your recorded weight and height history.</p>
+            <div className="progress-chart">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data.body}>
-                  <CartesianGrid stroke="rgba(35,33,30,0.08)" />
-                  <XAxis dataKey="week" stroke="#8a877f" />
-                  <YAxis stroke="#8a877f" />
-                  <Tooltip contentStyle={{ background: "#fff", color: "#292825", border: "1px solid #dfdcd4", borderRadius: 10 }} />
-                  <Bar isAnimationActive dataKey="weight" fill="var(--accent)" radius={[8, 8, 0, 0]} />
-                  <Bar isAnimationActive dataKey="height" fill="var(--green)" radius={[8, 8, 0, 0]} />
+                  <CartesianGrid stroke="rgba(255,255,255,.06)" vertical={false} />
+                  <XAxis dataKey="week" stroke="#7f8490" axisLine={false} tickLine={false} />
+                  <YAxis stroke="#7f8490" axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: "#14161c", color: "#fff", border: "1px solid #252934", borderRadius: 12 }} />
+                  <Bar dataKey="weight" fill="#f97316" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="height" fill="#22c55e" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </Card>
+          </article>
         </section>
       ) : (
-        <Card style={styles.emptyState}>
-          <div style={styles.emptyIcon}><Logo size={48} /></div>
-          <h2>Log your first workout to see progress here.</h2>
-          <p>Attendance, workouts, diet, and body metrics will turn into XP charts once you save your first daily log.</p>
-          <Link href="/customer/workouts" style={styles.emptyCta}>Open workouts</Link>
-        </Card>
+        <section className="progress-empty-state">
+          <span><Activity size={24} /></span>
+          <div>
+            <p className="if-kicker">Your timeline starts here</p>
+            <h2>One saved workout is enough to begin.</h2>
+            <p>Log training, meals or body metrics and Iron Forge will turn them into useful trends.</p>
+          </div>
+          <Link href="/customer/workouts">Start training <ArrowUpRight size={16} /></Link>
+        </section>
       )}
+
       <FormProgress />
     </div>
   );
 }
 
-function Stat({ label, value, accent, suffix = "", signed = false }: { label: string; value: number; accent: string; suffix?: string; signed?: boolean }) {
-  const prefix = signed && value > 0 ? "+" : "";
+function Metric({
+  icon,
+  label,
+  value,
+  detail,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  detail: string;
+  tone: string;
+}) {
   return (
-    <Card accent={accent} style={{ ...styles.stat, borderTopColor: accent }}>
-      <span>{label}</span>
-      <strong>{prefix}<CountUp value={value} suffix={suffix} /></strong>
-    </Card>
+    <article className={"progress-metric-card tone-" + tone}>
+      <span className="progress-metric-icon">{icon}</span>
+      <div>
+        <small>{label}</small>
+        <strong>{value}</strong>
+        <p>{detail}</p>
+      </div>
+    </article>
   );
 }
-
-const styles: Record<string, CSSProperties> = {
-  page: { padding: "clamp(20px, 3vw, 40px)", color: "#292825" },
-  hero: { padding: "22px 24px", marginBottom: 18, border: "1px solid #dfdcd4", borderLeft: "4px solid #e8671d", background: "rgba(255,255,255,.78)", boxShadow: "none" },
-  eyebrow: { color: theme.accent, fontSize: 10, letterSpacing: 4, fontWeight: 950 },
-  title: { color: "#1c1b19", fontWeight: 800, fontSize: "clamp(30px, 4vw, 44px)", lineHeight: 1.05, margin: "7px 0" },
-  copy: { color: "#76736c", lineHeight: 1.5 },
-  stats: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 18 },
-  stat: { minHeight: 112, borderTop: "3px solid", borderColor: "#dfdcd4", padding: 18, display: "grid", alignContent: "center", gap: 8, background: "rgba(255,255,255,.82)", color: "#292825", boxShadow: "none" },
-  chartGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 18 },
-  panel: { padding: 24, borderColor: "#dfdcd4", background: "rgba(255,255,255,.78)", color: "#292825", boxShadow: "none" },
-  sectionTitle: { color: "#292825", fontFamily: "Georgia, serif", fontWeight: 500, fontSize: 34, margin: "8px 0 18px" },
-  chart: { height: 320 },
-  emptyState: { padding: 32, display: "grid", justifyItems: "start", gap: 12, borderColor: "#dfdcd4", background: "rgba(255,255,255,.78)", color: "#76736c", boxShadow: "none" },
-  emptyIcon: { width: 56, height: 56, borderRadius: 12, display: "grid", placeItems: "center", background: theme.gradient, color: "#fff", fontWeight: 950 },
-  emptyCta: { minHeight: 46, display: "inline-flex", alignItems: "center", borderRadius: 10, background: theme.gradient, color: "#fff", padding: "0 16px", textDecoration: "none", fontWeight: 950 },
-};
