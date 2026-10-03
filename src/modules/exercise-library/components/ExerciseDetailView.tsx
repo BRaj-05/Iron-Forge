@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Dumbbell, ShieldCheck, Wind } from "lucide-react";
 import FadeInSection from "@/components/motion/FadeInSection";
 import PublicPageShell from "@/components/home/PublicPageShell";
+import ExerciseGuideAssistant from "@/modules/exercise-library/components/ExerciseGuideAssistant";
 import {
   exerciseImageForExercise,
   exercisePath,
@@ -100,17 +101,33 @@ export default function ExerciseDetailView({ exercise }: { exercise: Exercise })
         </div>
       </FadeInSection>
 
-      {exercise.youtubeId && (
-        <FadeInSection className="exercise-detail-section">
-          <div className="exercise-video-frame">
-            <iframe
-              title={`${exercise.name} video`}
-              src={`https://www.youtube.com/embed/${exercise.youtubeId}`}
-              allowFullScreen
-            />
-          </div>
-        </FadeInSection>
-      )}
+      <FadeInSection className="exercise-detail-section exercise-learning-grid">
+        <div className="exercise-learning-copy">
+          <p className="if-kicker">Watch + understand</p>
+          <h2>Learn the movement two ways.</h2>
+          <p>
+            Read the setup and cues first, then use the demonstration to connect the words to the movement.
+          </p>
+          {exercise.youtubeId ? (
+            <div className="exercise-video-frame">
+              <iframe
+                title={`${exercise.name} video demonstration`}
+                src={`https://www.youtube-nocookie.com/embed/${exercise.youtubeId}?rel=0`}
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <div className="exercise-video-placeholder">
+              <strong>Video guide coming soon</strong>
+              <span>The written technique guide is complete and safe to use meanwhile.</span>
+            </div>
+          )}
+        </div>
+        <ExerciseGuideAssistant exercise={exercise} />
+      </FadeInSection>
 
       <FadeInSection className="exercise-detail-section">
         <div className="exercise-section-heading">
