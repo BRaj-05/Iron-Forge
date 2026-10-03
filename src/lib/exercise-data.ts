@@ -39,6 +39,16 @@ export type MuscleGroup = {
 };
 
 
+const exerciseVideoFallbackByMuscle: Record<string, string> = {
+  chest: "84ObaROTa78",
+  back: "NaU8mlULPmY",
+  shoulders: "Z5g48LuHB9s",
+  biceps: "LhRQiKOO8P4",
+  triceps: "iwQPOuFQyXY",
+  legs: "UXJrBgI2RxA",
+  core: "4E1QqHIO_Ys",
+};
+
 const exerciseVideoMap: Record<string, string> = {
   "push-up": "Q7cPaJZoOng",
   "squat": "UXJrBgI2RxA",
@@ -384,7 +394,7 @@ function buildExercise(
       advanced: "4-5 sets with planned load progression",
     },
     alternatives: item.alternatives,
-    youtubeId: exerciseVideoMap[slugify(item.name)] || "",
+    youtubeId: exerciseVideoMap[slugify(item.name)] || exerciseVideoFallbackByMuscle[group.slug] || "",
     imageSlot: group.imageSlot,
     mainBenefit: item.benefit,
   };
